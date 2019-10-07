@@ -3,7 +3,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 
-public class Worker extends Node{
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+
+import sun.security.provider.JavaKeyStore.CaseExactJKS;
+
+public class Broker extends Node{
 	private final byte TYPE_DATA = 0;
 	private final byte TYPE_ACK = 1;
 	private final int TYPE_POS = 0;
@@ -28,10 +32,10 @@ public class Worker extends Node{
 	
 	
 	
-	public Worker(int socket) {
+	public Broker() {
 		try {
 		brokerAddress = new InetSocketAddress(BROKER_NODE, BROKER_SOCKET);
-		this.socket = new DatagramSocket(socket);
+		this.socket = new DatagramSocket(BROKER_SOCKET);
 		}
 		catch (Exception e){
 			e.printStackTrace();
@@ -63,8 +67,24 @@ public class Worker extends Node{
 	}
 
 	@Override
-	public void onReceipt(DatagramPacket packet) {
+	public synchronized void onReceipt(DatagramPacket packet) {
 		// TODO Auto-generated method stub
+		try {
+			String content;
+			byte[] data = packet.getData();
+			
+			switch (data[TYPE_POS]) {
+			case TYPE_DATA:
+				break;
+			case TYPE_ACK:
+				break;
+			default:
+				System.out.println("Error, wrong data type");
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 		
 		
 	}

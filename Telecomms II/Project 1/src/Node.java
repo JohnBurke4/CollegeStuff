@@ -18,9 +18,11 @@ public abstract class Node {
 		listener.start();
 	}
 	
-	public abstract void sendMessage();
+	public abstract void sendMessage() throws Exception;
 	
 	public abstract void onReceipt(DatagramPacket packet);
+	
+	public abstract void run();
 	
 	class Listener extends Thread {
 		public void go() {
