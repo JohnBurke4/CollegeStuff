@@ -205,9 +205,10 @@ class DoublyLinkedList<T extends Comparable<T>>
 			}
 			else if (pos == index) {
 				if (currentNode.next != null) {
-					currentNode.prev = currentNode.prev.next;
+					currentNode.next.prev = currentNode.prev;
 				}
 				currentNode.prev.next = currentNode.next;
+				return true;
 			}
 			index++;
 			currentNode = currentNode.next;
@@ -223,6 +224,11 @@ class DoublyLinkedList<T extends Comparable<T>>
     public void deleteFirstNode() {
     	head = head.next;
     	head.prev = null;
+    }
+    
+    public void deleteLastNode() {
+    	tail.prev.next = null;
+    	tail = tail.prev;
     }
 
     /**
@@ -348,6 +354,7 @@ class DoublyLinkedList<T extends Comparable<T>>
     public void enqueue(T item) 
     {
       //TODO
+    	push(item);
     }
 
      /**
@@ -362,7 +369,19 @@ class DoublyLinkedList<T extends Comparable<T>>
     public T dequeue() 
     {
       //TODO
-      return null;
+    	if (isEmpty()) {
+    		return null;
+    	}
+    	else if (head == tail){
+    		T value = tail.data;
+    		deleteOnlyNode();
+    		return value;	
+    	}
+    	else {
+    		T value = tail.data;
+    		deleteLastNode();
+    		return value;
+    	}
     }
  
 
@@ -398,17 +417,6 @@ class DoublyLinkedList<T extends Comparable<T>>
 
       return s.toString();
     }
-    
-    public static void main(String[] args) {
-    	DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
-    	dll.insertBefore(0, 1);
-		dll.insertBefore(1, 1);
-		dll.insertBefore(2, 3);
-		dll.insertBefore(3, 1);
-		dll.insertBefore(4, 2);
-		dll.insertBefore(5, 3);
-		dll.makeUnique();
-	}
 
 }
 

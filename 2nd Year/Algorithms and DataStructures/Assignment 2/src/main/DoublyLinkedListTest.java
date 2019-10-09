@@ -63,6 +63,26 @@ class DoublyLinkedListTest {
 	}
 	
 	@Test
+	void testOnlyValueDeleted() {
+		DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
+		dll.insertBefore(0, 1);
+		
+		assertTrue(dll.deleteAt(0), "Node not found in dll");
+		assertTrue(dll.isEmpty(), "Only node not deleted");
+	}
+	
+	@Test
+	void testFirstValueDeleted() {
+		DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
+		dll.insertBefore(0, 1);
+		dll.insertBefore(0, 2);
+		
+		assertTrue(dll.deleteAt(0), "Node not found in dll");
+		assertEquals("1", dll.toString(), "First node not deleted");
+	}
+	
+	
+	@Test
 	void testValueDeleted() {
 		DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
 		int unexpectedData = 4;
@@ -71,7 +91,6 @@ class DoublyLinkedListTest {
 		dll.insertBefore(0, 2);
 		dll.insertBefore(0, 3);
 		dll.insertBefore(dataPos, unexpectedData);
-		
 		assertTrue(dll.deleteAt(dataPos), "Node not found in dll");
 		assertEquals("3,2,1", dll.toString());
 	}
@@ -134,6 +153,29 @@ class DoublyLinkedListTest {
 		dll.push(10);
 		assertEquals(Integer.valueOf(10), dll.pop(), "Value not popped from dll");
 		assertTrue(dll.isEmpty(), "Pop did not empty dll");
+	}
+	
+	@Test
+	void testEnqueue() {
+		DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
+		dll.enqueue(10);
+		assertEquals("10", dll.toString(), "Enqueue failed enqueueing onto an empty dll");
+		dll.enqueue(20);;
+		assertEquals("20,10", dll.toString(), "Enqueue failed enqueueing onto dll");
+	}
+	
+	@Test
+	void testDequeue() {
+		DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
+		assertNull(dll.dequeue(), "Dequeue not null for empty dll");
+		dll.enqueue(10);
+		assertEquals(Integer.valueOf(10), dll.dequeue(), "Value not dequeued from dll");
+		assertTrue(dll.isEmpty(), "Dequeue did not empty dll");
+		dll.enqueue(10);
+		dll.enqueue(20);
+		dll.enqueue(30);
+		assertEquals(Integer.valueOf(10), dll.dequeue(), "Value not dequeued from dll");
+		assertEquals("30,20", dll.toString(), "Dequeue failed deleting from dll");
 	}
 
 }
