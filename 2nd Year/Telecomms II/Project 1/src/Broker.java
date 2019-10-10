@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
-import sun.security.provider.JavaKeyStore.CaseExactJKS;
 
 public class Broker extends Node{
 	private final byte TYPE_DATA = 0;
@@ -72,9 +71,13 @@ public class Broker extends Node{
 		try {
 			String content;
 			byte[] data = packet.getData();
+			byte[] byteContent = new byte[data.length - HEADER_LENGTH];
 			
 			switch (data[TYPE_POS]) {
 			case TYPE_DATA:
+				System.arraycopy(data, HEADER_LENGTH, byteContent, 0, data.length-HEADER_LENGTH);
+				content = new String(byteContent);
+				System.out.println(content);
 				break;
 			case TYPE_ACK:
 				break;
@@ -93,6 +96,17 @@ public class Broker extends Node{
 	public void run() {
 		while(true) {
 			
+		}
+	}
+	
+	public static void main(String[] args) {
+		try {
+			Broker broker = new Broker();
+			broker.run();
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
 		}
 	}
 

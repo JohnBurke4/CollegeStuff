@@ -72,7 +72,23 @@ public class Worker extends Node{
 	@Override
 	public void run() {
 		while(true) {
-			
+			try {
+			sendMessage();
+			}
+			catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void main(String[] args) {
+		try {
+			Worker worker1 = new Worker(50005);
+			worker1.run();
+		}
+		catch (Exception e) {
+			// TODO: handle exception
 		}
 	}
 
