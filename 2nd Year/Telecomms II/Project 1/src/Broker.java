@@ -23,14 +23,25 @@ public class Broker extends Node{
 	private final int NODE_POS = 2;
 	
 	private final int LENGTH_POS = 3;
-	private final int HEADER_LENGTH = 3;
+	private final int HEADER_LENGTH = 4;
 	
 	private final int BROKER_SOCKET = 45000;
+	private final int BROKER_OUT_SOCKET = 45001;
 	private final String BROKER_NODE = "localhost";
+	private String currentOrder = "";
 	
 	InetSocketAddress brokerAddress;
 
 	ArrayList<SocketAddress> workerAddresses = new ArrayList<SocketAddress>();
+
+	public void setCurrentOrder(String order){
+		currentOrder = order;
+	}
+
+	public String getCurrentOrder(){
+		return currentOrder;
+	}
+
 	
 	
 	
@@ -53,18 +64,21 @@ public class Broker extends Node{
 		// TODO Auto-generated method stub
 		byte[] data = null;
 		DatagramPacket packet = null;
-		String toSend = "test";
+		String toSend = getCurrentOrder();
 		byte[] message = toSend.getBytes();
 		data = new byte[message.length + HEADER_LENGTH];
 		
 		data[TYPE_POS] = TYPE_DATA;
 		data[FRAME_POS] = 0;
-		data[NODE_POS] = WORKER_TYPE;
+		data[NODE_POS] = BROKER_TYPE;
 		data[LENGTH_POS] = (byte) message.length;
 		System.arraycopy(message, 0, data, HEADER_LENGTH, message.length);
 		packet = new DatagramPacket(data, data.length);
-		packet.setSocketAddress(brokerAddress);
-		socket.send(packet);
+		for (SocketAddress currentWorkerAddress: workerAddresses){
+			packet.setSocketAddress(currentWorkerAddress);
+			socket.send(packet);
+		}
+
 		this.wait();
 		
 	}
@@ -78,6 +92,7 @@ public class Broker extends Node{
 		data[FRAME_POS] = 0;
 		data[NODE_POS] = BROKER_TYPE;
 		packet = new DatagramPacket(data, data.length);
+		System.out.println(returnAddress.toString());
 		packet.setSocketAddress(returnAddress);
 		socket.send(packet);
 	}
@@ -88,12 +103,29 @@ public class Broker extends Node{
 		try {
 			String content;
 			byte[] data = packet.getData();
-			
+			System.out.println("Hi");
 			switch (data[TYPE_POS]) {
 			case TYPE_DATA:
 				byte[] byteContent = new byte[data.length - HEADER_LENGTH];
 				System.arraycopy(data, HEADER_LENGTH, byteContent, 0, data.length-HEADER_LENGTH);
 				content = new String(byteContent);
+				switch (data[NODE_POS]){
+					case WORKER_TYPE:
+						if (workerAddresses.contains(packet.getSocketAddress())){
+						}
+						else{
+							workerAddresses.add(packet.getSocketAddress());
+							System.out.println("Adding address");
+						}
+
+						break;
+					case C_AND_C_TYPE:
+						System.out.println("Sending order");
+						setCurrentOrder(content.trim());
+						sendMessage();
+						break;
+				}
+
 				System.out.println(content);
 				sendAck(packet.getSocketAddress());
 				break;

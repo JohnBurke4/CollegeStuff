@@ -18,7 +18,7 @@ public class Worker extends Node{
 	private final int NODE_POS = 2;
 	
 	private final int LENGTH_POS = 3;
-	private final int HEADER_LENGTH = 3;
+	private final int HEADER_LENGTH = 4;
 	
 	private final int BROKER_SOCKET = 45000;
 	private final String BROKER_NODE = "localhost";
@@ -69,10 +69,13 @@ public class Worker extends Node{
 		DatagramPacket packet = null;
 		data[TYPE_POS] = TYPE_ACK;
 		data[FRAME_POS] = 0;
-		data[NODE_POS] = BROKER_TYPE;
+		data[NODE_POS] = WORKER_TYPE;
+		System.out.println(data.length);
 		packet = new DatagramPacket(data, data.length);
+		System.out.println(returnAddress.toString());
 		packet.setSocketAddress(returnAddress);
 		socket.send(packet);
+		System.out.println("Ack sent");
 	}
 	@Override
 	public synchronized void onReceipt(DatagramPacket packet) {
@@ -88,6 +91,7 @@ public class Worker extends Node{
 					System.arraycopy(data, HEADER_LENGTH, byteContent, 0, data.length-HEADER_LENGTH);
 					content = new String(byteContent);
 					System.out.println(content);
+					System.out.println("Acc did get there");
 					sendAck(packet.getSocketAddress());
 					break;
 				case TYPE_ACK:

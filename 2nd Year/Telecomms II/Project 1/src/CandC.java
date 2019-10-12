@@ -18,7 +18,7 @@ public class CandC extends Node{
     private final int NODE_POS = 2;
 
     private final int LENGTH_POS = 3;
-    private final int HEADER_LENGTH = 3;
+    private final int HEADER_LENGTH = 4;
 
     private final int BROKER_SOCKET = 45000;
     private final String BROKER_NODE = "localhost";
@@ -46,12 +46,12 @@ public class CandC extends Node{
         // TODO Auto-generated method stub
         byte[] data = null;
         DatagramPacket packet = null;
-        String toSend = "Hello world";
+        String toSend = "TestCommand";
         byte[] message = toSend.getBytes();
         data = new byte[message.length + HEADER_LENGTH];
         data[TYPE_POS] = TYPE_DATA;
         data[FRAME_POS] = 0;
-        data[NODE_POS] = WORKER_TYPE;
+        data[NODE_POS] = C_AND_C_TYPE;
         data[LENGTH_POS] = (byte) message.length;
         System.arraycopy(message, 0, data, HEADER_LENGTH, message.length);
         packet = new DatagramPacket(data, data.length);
