@@ -3,10 +3,13 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Scanner;
 
 public class Worker extends Node{
 	private final byte TYPE_DATA = 0;
 	private final byte TYPE_ACK = 1;
+	private final byte TYPE_CONNECTION = 2;
+	private final byte TYPE_CONNECTION_ACK = 3;
 	private final int TYPE_POS = 0;
 	
 	private final byte FRAME_1 = 0;
@@ -24,6 +27,8 @@ public class Worker extends Node{
 	private final String BROKER_NODE = "localhost";
 	
 	InetSocketAddress brokerAddress;
+
+	private boolean connected = false;
 	
 	
 	
@@ -32,6 +37,7 @@ public class Worker extends Node{
 		brokerAddress = new InetSocketAddress(BROKER_NODE, BROKER_SOCKET);
 		this.socket = new DatagramSocket(socket);
 		listener.go();
+		connectToServer();
 		}
 		catch (Exception e){
 			e.printStackTrace();
@@ -57,7 +63,6 @@ public class Worker extends Node{
 		packet = new DatagramPacket(data, data.length);
 		packet.setSocketAddress(brokerAddress);
 		socket.send(packet);
-		System.out.println("Sent message");
 		this.wait();
 		
 	}
@@ -70,9 +75,7 @@ public class Worker extends Node{
 		data[TYPE_POS] = TYPE_ACK;
 		data[FRAME_POS] = 0;
 		data[NODE_POS] = WORKER_TYPE;
-		System.out.println(data.length);
 		packet = new DatagramPacket(data, data.length);
-		System.out.println(returnAddress.toString());
 		packet.setSocketAddress(returnAddress);
 		socket.send(packet);
 		System.out.println("Ack sent");
@@ -91,12 +94,17 @@ public class Worker extends Node{
 					System.arraycopy(data, HEADER_LENGTH, byteContent, 0, data.length-HEADER_LENGTH);
 					content = new String(byteContent);
 					System.out.println(content);
-					System.out.println("Acc did get there");
 					sendAck(packet.getSocketAddress());
+
 					break;
 				case TYPE_ACK:
 					System.out.println("Ack recieved");
 					break;
+				case TYPE_CONNECTION_ACK:
+					System.out.println("Connected to server");
+					connected = true;
+					break;
+
 				default:
 					System.out.println("Error, wrong data type");
 			}
@@ -106,6 +114,37 @@ public class Worker extends Node{
 		}
 
 
+	}
+
+	public void acceptOrDeclineOrder(){
+		System.out.println("Would you like to accept this order? [Y:N]");
+		boolean correctInput = false;
+		boolean accepted = true;
+		while (!correctInput) {
+			Scanner sc = new Scanner(System.in);
+			if (sc.hasNext("Y")) {
+				correctInput = true;
+				accepted = true;
+			} else if (sc.hasNext("N")) {
+				accepted = false;
+				correctInput = true;
+			}
+			else {
+				continue;
+			}
+			sendOrderReply(accepted);
+		}
+	}
+
+	public void sendOrderReply(boolean accepted) throws IOException {
+		byte[] data = new byte[HEADER_LENGTH];
+		DatagramPacket packet = null;
+		data[TYPE_POS] = TYPE_CONNECTION;
+		data[FRAME_POS] = 0;
+		data[NODE_POS] = WORKER_TYPE;
+		packet = new DatagramPacket(data, data.length);
+		packet.setSocketAddress(brokerAddress);
+		socket.send(packet);
 	}
 	
 	@Override
@@ -120,7 +159,24 @@ public class Worker extends Node{
 			}
 		}
 	}
-	
+
+	@Override
+	public synchronized void connectToServer() throws Exception {
+		while (!connected){
+			byte[] data = new byte[HEADER_LENGTH];
+			DatagramPacket packet = null;
+			data[TYPE_POS] = TYPE_CONNECTION;
+			data[FRAME_POS] = 0;
+			data[NODE_POS] = WORKER_TYPE;
+			packet = new DatagramPacket(data, data.length);
+			packet.setSocketAddress(brokerAddress);
+			socket.send(packet);
+			System.out.println("No connection yet, trying again...");
+			this.wait(2000);
+
+		}
+	}
+
 	public static void main(String[] args) {
 		try {
 			Worker worker1 = new Worker(50005);

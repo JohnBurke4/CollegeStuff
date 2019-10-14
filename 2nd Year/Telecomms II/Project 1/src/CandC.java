@@ -3,10 +3,13 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Scanner;
 
 public class CandC extends Node{
     private final byte TYPE_DATA = 0;
     private final byte TYPE_ACK = 1;
+    private final byte TYPE_CONNECTION = 2;
+    private final byte TYPE_CONNECTION_ACK = 3;
     private final int TYPE_POS = 0;
 
     private final byte FRAME_1 = 0;
@@ -23,6 +26,8 @@ public class CandC extends Node{
     private final int BROKER_SOCKET = 45000;
     private final String BROKER_NODE = "localhost";
 
+    private boolean connected = false;
+
     InetSocketAddress brokerAddress;
 
 
@@ -32,6 +37,7 @@ public class CandC extends Node{
             brokerAddress = new InetSocketAddress(BROKER_NODE, BROKER_SOCKET);
             this.socket = new DatagramSocket(socket);
             listener.go();
+            connectToServer();
         }
         catch (Exception e){
             e.printStackTrace();
@@ -44,9 +50,11 @@ public class CandC extends Node{
     @Override
     public synchronized void sendMessage() throws Exception {
         // TODO Auto-generated method stub
+        Scanner sc = new Scanner(System.in);
         byte[] data = null;
         DatagramPacket packet = null;
-        String toSend = "TestCommand";
+        System.out.println("Please issue the command you wish to send: ");
+        String toSend = sc.nextLine();
         byte[] message = toSend.getBytes();
         data = new byte[message.length + HEADER_LENGTH];
         data[TYPE_POS] = TYPE_DATA;
@@ -93,6 +101,10 @@ public class CandC extends Node{
                 case TYPE_ACK:
                     System.out.println("Ack recieved");
                     break;
+                case TYPE_CONNECTION_ACK:
+                    System.out.println("Connected to server");
+                    connected = true;
+                    break;
                 default:
                     System.out.println("Error, wrong data type");
             }
@@ -114,6 +126,23 @@ public class CandC extends Node{
                 // TODO: handle exception
                 e.printStackTrace();
             }
+        }
+    }
+
+    @Override
+    public synchronized void connectToServer() throws Exception {
+        while (!connected){
+            byte[] data = new byte[HEADER_LENGTH];
+            DatagramPacket packet = null;
+            data[TYPE_POS] = TYPE_CONNECTION;
+            data[FRAME_POS] = 0;
+            data[NODE_POS] = C_AND_C_TYPE;
+            packet = new DatagramPacket(data, data.length);
+            packet.setSocketAddress(brokerAddress);
+            socket.send(packet);
+            System.out.println("No connection yet, trying again...");
+            this.wait(2000);
+
         }
     }
 

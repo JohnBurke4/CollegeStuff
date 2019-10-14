@@ -11,6 +11,8 @@ import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 public class Broker extends Node{
 	private final byte TYPE_DATA = 0;
 	private final byte TYPE_ACK = 1;
+	private final byte TYPE_CONNECTION = 2;
+	private final byte TYPE_CONNECTION_ACK = 3;
 	private final int TYPE_POS = 0;
 	
 	private final byte FRAME_1 = 0;
@@ -33,6 +35,8 @@ public class Broker extends Node{
 	InetSocketAddress brokerAddress;
 
 	ArrayList<SocketAddress> workerAddresses = new ArrayList<SocketAddress>();
+
+	private SocketAddress cAndCAddress;
 
 	public void setCurrentOrder(String order){
 		currentOrder = order;
@@ -78,9 +82,6 @@ public class Broker extends Node{
 			packet.setSocketAddress(currentWorkerAddress);
 			socket.send(packet);
 		}
-
-		this.wait();
-		
 	}
 
 	@Override
@@ -92,7 +93,6 @@ public class Broker extends Node{
 		data[FRAME_POS] = 0;
 		data[NODE_POS] = BROKER_TYPE;
 		packet = new DatagramPacket(data, data.length);
-		System.out.println(returnAddress.toString());
 		packet.setSocketAddress(returnAddress);
 		socket.send(packet);
 	}
@@ -103,7 +103,6 @@ public class Broker extends Node{
 		try {
 			String content;
 			byte[] data = packet.getData();
-			System.out.println("Hi");
 			switch (data[TYPE_POS]) {
 			case TYPE_DATA:
 				byte[] byteContent = new byte[data.length - HEADER_LENGTH];
@@ -111,16 +110,10 @@ public class Broker extends Node{
 				content = new String(byteContent);
 				switch (data[NODE_POS]){
 					case WORKER_TYPE:
-						if (workerAddresses.contains(packet.getSocketAddress())){
-						}
-						else{
-							workerAddresses.add(packet.getSocketAddress());
-							System.out.println("Adding address");
-						}
+
 
 						break;
 					case C_AND_C_TYPE:
-						System.out.println("Sending order");
 						setCurrentOrder(content.trim());
 						sendMessage();
 						break;
@@ -130,8 +123,27 @@ public class Broker extends Node{
 				sendAck(packet.getSocketAddress());
 				break;
 			case TYPE_ACK:
-				System.out.println("Message revieved");
+				System.out.println("Ack recieved");
 				break;
+
+			case TYPE_CONNECTION:
+				System.out.println("Connection recieved: ");
+				switch (data[NODE_POS]) {
+					case WORKER_TYPE:
+						System.out.println("Worker connected");
+						if (workerAddresses.contains(packet.getSocketAddress())){
+						}
+						else{
+							workerAddresses.add(packet.getSocketAddress());
+						}
+						break;
+					case C_AND_C_TYPE:
+					System.out.println("C and C connected");
+						cAndCAddress = packet.getSocketAddress();
+						break;
+				}
+				sendConnectionAck(packet.getSocketAddress());
+			break;
 			default:
 				System.out.println("Error, wrong data type");
 			}
@@ -149,7 +161,23 @@ public class Broker extends Node{
 			
 		}
 	}
-	
+
+	@Override
+	public void connectToServer() throws Exception {
+
+	}
+
+	public void sendConnectionAck(SocketAddress address) throws Exception{
+		byte[] data = new byte[HEADER_LENGTH];
+		DatagramPacket packet = null;
+		data[TYPE_POS] = TYPE_CONNECTION_ACK;
+		data[FRAME_POS] = 0;
+		data[NODE_POS] = BROKER_TYPE;
+		packet = new DatagramPacket(data, data.length);
+		packet.setSocketAddress(address);
+		socket.send(packet);
+	}
+
 	public static void main(String[] args) {
 		try {
 			Broker broker = new Broker();

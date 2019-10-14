@@ -29,6 +29,8 @@ public abstract class Node {
 	public abstract void onReceipt(DatagramPacket packet);
 	
 	public abstract void run();
+
+	public abstract void connectToServer() throws Exception;
 	
 	class Listener extends Thread {
 		public void go() {
