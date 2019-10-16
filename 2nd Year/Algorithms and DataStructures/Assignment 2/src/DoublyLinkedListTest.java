@@ -2,6 +2,9 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import javax.xml.bind.annotation.XmlElementDecl.GLOBAL;
+
 import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
@@ -73,8 +76,11 @@ public class DoublyLinkedListTest
 	public void testEmpty() {
 		DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
 		assertTrue("Empty dll checked as not empty", dll.isEmpty());
+		dll.insertBefore(0,1);
+		assertFalse("The list is still empty after one element was added", dll.isEmpty());
 	}
 	
+    
 	@Test
 	public void testAddNodeToEmpty() {
 		DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
@@ -104,6 +110,12 @@ public class DoublyLinkedListTest
 		assertEquals("Incorrect data at beginning of dll", "4,1,2,3", dll.toString());
 	}
 	
+	@Test 
+	public void testGetValueFromEmptyList() {
+		DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
+		assertNull("Get function not null for getting from empty array", dll.get(0));
+	}
+	
 	@Test
 	public void testGetValueNotStored() {
 		DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
@@ -121,6 +133,20 @@ public class DoublyLinkedListTest
 		
 		assertTrue("Node not found in dll", dll.deleteAt(0));
 		assertTrue("Only node not deleted", dll.isEmpty());
+	}
+	
+	@Test 
+	public void testDeleteOnlyNode() {
+		DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
+		dll.insertBefore(0, 1);
+		assertFalse("Node not found in dll", dll.deleteAt(100));
+	}
+	
+	@Test
+	public void deleteFromEmptyList() {
+		DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
+		assertFalse("Node not found in dll", dll.deleteAt(0));
+
 	}
 	
 	@Test
