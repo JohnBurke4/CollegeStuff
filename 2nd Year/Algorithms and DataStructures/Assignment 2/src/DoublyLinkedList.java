@@ -1,4 +1,3 @@
-package main;
 
 import java.awt.event.ItemEvent;
 import java.util.Iterator;
@@ -227,8 +226,9 @@ class DoublyLinkedList<T extends Comparable<T>>
     }
     
     public void deleteFirstNode() {
+    	head.next.prev = null;
     	head = head.next;
-    	head.prev = null;
+    	
     }
     
     public void deleteLastNode() {
