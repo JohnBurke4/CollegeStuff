@@ -13,6 +13,8 @@ public class Broker extends Node{
 	private final byte TYPE_ACK = 1;
 	private final byte TYPE_CONNECTION = 2;
 	private final byte TYPE_CONNECTION_ACK = 3;
+	private final byte TYPE_ORDER_ACCERPTED = 4;
+	private final byte TYPE_ORDER_DECLINED = 5;
 	private final int TYPE_POS = 0;
 	
 	private final byte FRAME_1 = 0;
@@ -114,8 +116,11 @@ public class Broker extends Node{
 
 						break;
 					case C_AND_C_TYPE:
-						setCurrentOrder(content.trim());
-						sendMessage();
+						//setCurrentOrder(content.trim());
+						//sendMessage();
+						System.out.println(byteContent.length);
+						BrokerCommand command = BrokerCommand.makeFromSerialized(byteContent);
+						System.out.println(command.getCommand());
 						break;
 				}
 

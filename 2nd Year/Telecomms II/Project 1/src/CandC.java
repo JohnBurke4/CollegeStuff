@@ -50,25 +50,35 @@ public class CandC extends Node{
     @Override
     public synchronized void sendMessage() throws Exception {
         // TODO Auto-generated method stub
-        Scanner sc = new Scanner(System.in);
+
         byte[] data = null;
         DatagramPacket packet = null;
-        System.out.println("Please issue the command you wish to send: ");
-        String toSend = sc.nextLine();
-        byte[] message = toSend.getBytes();
-        data = new byte[message.length + HEADER_LENGTH];
+
+
+        byte[] command = BrokerCommand.getSerialized(createCommand());
+        data = new byte[command.length + HEADER_LENGTH];
         data[TYPE_POS] = TYPE_DATA;
         data[FRAME_POS] = 0;
         data[NODE_POS] = C_AND_C_TYPE;
-        data[LENGTH_POS] = (byte) message.length;
-        System.arraycopy(message, 0, data, HEADER_LENGTH, message.length);
+        data[LENGTH_POS] = (byte) command.length;
+        System.arraycopy(command, 0, data, HEADER_LENGTH, command.length);
         packet = new DatagramPacket(data, data.length);
         packet.setSocketAddress(brokerAddress);
         socket.send(packet);
-        System.out.println("Sent message");
+        System.out.println("Sent command");
         this.wait();
-
     }
+
+    public BrokerCommand createCommand(){
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Please issue the command you wish to send: ");
+        String command = sc.nextLine();
+        System.out.println("Please input the amount of workers needed: ");
+        int workers = sc.nextInt();
+        BrokerCommand commandToSend = new BrokerCommand(command, null, workers);
+        return commandToSend;
+    }
+
 
     @Override
     public synchronized void sendAck(SocketAddress returnAddress) throws Exception {

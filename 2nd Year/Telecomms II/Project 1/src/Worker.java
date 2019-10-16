@@ -10,6 +10,8 @@ public class Worker extends Node{
 	private final byte TYPE_ACK = 1;
 	private final byte TYPE_CONNECTION = 2;
 	private final byte TYPE_CONNECTION_ACK = 3;
+	private final byte TYPE_ORDER_ACCERPTED = 4;
+	private final byte TYPE_ORDER_DECLINED = 5;
 	private final int TYPE_POS = 0;
 	
 	private final byte FRAME_1 = 0;
@@ -29,6 +31,7 @@ public class Worker extends Node{
 	InetSocketAddress brokerAddress;
 
 	private boolean connected = false;
+	private boolean ackRecieved = false;
 	
 	
 	
@@ -69,7 +72,6 @@ public class Worker extends Node{
 
 	@Override
 	public synchronized void sendAck(SocketAddress returnAddress) throws Exception {
-		// TODO Auto-generated method stub
 		byte[] data = new byte[HEADER_LENGTH];
 		DatagramPacket packet = null;
 		data[TYPE_POS] = TYPE_ACK;
@@ -82,7 +84,6 @@ public class Worker extends Node{
 	}
 	@Override
 	public synchronized void onReceipt(DatagramPacket packet) {
-		// TODO Auto-generated method stub
 		try {
 			String content;
 			byte[] data = packet.getData();
@@ -93,9 +94,9 @@ public class Worker extends Node{
 					byte[] byteContent = new byte[data.length - HEADER_LENGTH];
 					System.arraycopy(data, HEADER_LENGTH, byteContent, 0, data.length-HEADER_LENGTH);
 					content = new String(byteContent);
-					System.out.println(content);
+					System.out.println("Command said: " + content);
 					sendAck(packet.getSocketAddress());
-
+					acceptOrDeclineOrder();
 					break;
 				case TYPE_ACK:
 					System.out.println("Ack recieved");
@@ -117,10 +118,11 @@ public class Worker extends Node{
 	}
 
 	public void acceptOrDeclineOrder(){
-		System.out.println("Would you like to accept this order? [Y:N]");
+
 		boolean correctInput = false;
 		boolean accepted = true;
 		while (!correctInput) {
+			System.out.println("Would you like to accept this order? [Y:N]");
 			Scanner sc = new Scanner(System.in);
 			if (sc.hasNext("Y")) {
 				correctInput = true;
@@ -130,16 +132,27 @@ public class Worker extends Node{
 				correctInput = true;
 			}
 			else {
+				System.out.println("Incorrect input, please try again");
 				continue;
 			}
-			sendOrderReply(accepted);
+			try {
+				sendOrderReply(accepted);
+			}
+			catch (Exception e){
+				e.printStackTrace();
+			}
 		}
 	}
 
 	public void sendOrderReply(boolean accepted) throws IOException {
 		byte[] data = new byte[HEADER_LENGTH];
 		DatagramPacket packet = null;
-		data[TYPE_POS] = TYPE_CONNECTION;
+		if (accepted){
+			data[TYPE_POS] = TYPE_ORDER_ACCERPTED;
+		}
+		else{
+			data[TYPE_POS] = TYPE_ORDER_DECLINED;
+		}
 		data[FRAME_POS] = 0;
 		data[NODE_POS] = WORKER_TYPE;
 		packet = new DatagramPacket(data, data.length);
@@ -151,7 +164,7 @@ public class Worker extends Node{
 	public void run() {
 		while(true) {
 			try {
-			sendMessage();
+			//sendMessage();
 			}
 			catch (Exception e) {
 				// TODO: handle exception
