@@ -3,9 +3,7 @@ package main;
 import java.awt.event.ItemEvent;
 import java.util.Iterator;
 import java.util.ListIterator;
-import java.util.NoSuchElementException;
 
-import sun.invoke.empty.Empty;
 
 // -------------------------------------------------------------------------
 /**
