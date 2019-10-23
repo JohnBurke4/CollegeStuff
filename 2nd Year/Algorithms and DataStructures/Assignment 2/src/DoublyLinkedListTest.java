@@ -35,6 +35,8 @@ public class DoublyLinkedListTest
     /**
      * Check if the insertBefore works
      */
+    
+    
     @Test
     public void testInsertBefore()
     {

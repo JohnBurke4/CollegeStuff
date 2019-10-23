@@ -199,7 +199,7 @@ class DoublyLinkedList<T extends Comparable<T>>
     	DLLNode currentNode = head;
 		int index = 0;
 		while (currentNode != null && index <= pos) {
-			if (pos == 0 && currentNode.next == null && currentNode.prev == null) {
+			if (pos == 0 && head == tail) {
 				deleteOnlyNode();
 				return true;
 			}
@@ -207,10 +207,13 @@ class DoublyLinkedList<T extends Comparable<T>>
 				deleteFirstNode();
 				return true;
 			}
+			
 			else if (pos == index) {
-				if (currentNode.next != null) {
-					currentNode.next.prev = currentNode.prev;
+				if (currentNode == tail) {
+					deleteLastNode();
+					return true;
 				}
+				currentNode.next.prev = currentNode.prev;
 				currentNode.prev.next = currentNode.next;
 				return true;
 			}
@@ -226,14 +229,15 @@ class DoublyLinkedList<T extends Comparable<T>>
     }
     
     public void deleteFirstNode() {
-    	head.next.prev = null;
     	head = head.next;
+    	head.prev = null;
     	
     }
     
     public void deleteLastNode() {
-    	tail.prev.next = null;
     	tail = tail.prev;
+    	tail.next = null;
+    	
     }
 
     /**
