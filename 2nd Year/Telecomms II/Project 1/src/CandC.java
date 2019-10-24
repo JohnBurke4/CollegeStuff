@@ -67,7 +67,6 @@ public class CandC extends Node{
         packet.setSocketAddress(brokerAddress);
         socket.send(packet);
         System.out.println("Sent command");
-        this.wait();
     }
 
     public BrokerCommand createCommand(){
