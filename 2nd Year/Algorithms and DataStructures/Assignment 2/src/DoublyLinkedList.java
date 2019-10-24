@@ -1,11 +1,8 @@
-package main;
 
 import java.awt.event.ItemEvent;
 import java.util.Iterator;
 import java.util.ListIterator;
-import java.util.NoSuchElementException;
 
-import sun.invoke.empty.Empty;
 
 // -------------------------------------------------------------------------
 /**
@@ -81,10 +78,11 @@ class DoublyLinkedList<T extends Comparable<T>>
      * Tests if the doubly linked list is empty
      * @return true if list is empty, and false otherwise
      *
-     * Worst-case asymptotic running time cost: TODO
+     * Worst-case asymptotic running time cost: Theta(1)
      *
      * Justification:
-     *  TODO
+     *  The method only checks the head and tail, which do not depend on the size of the input.
+	 *  Therefore it only checks two nodes which gives it a Theta(1) worst-case asymptotic time
      */
     public boolean isEmpty()
     {
@@ -101,10 +99,12 @@ class DoublyLinkedList<T extends Comparable<T>>
      * @param data : The new data of class T that needs to be added to the list
      * @return none
      *
-     * Worst-case asymptotic running time cost: TODO
+     * Worst-case asymptotic running time cost: Theta(n)
      *
      * Justification:
-     *  TODO
+     *  The worst case scenario is when the node is placed at the end or in the middle
+	 *  To do this the method has to iterate through each item and check it's index
+	 *  This gives it an asymptotic running cost of Theta(n)
      */
     public void insertBefore( int pos, T data ) 
     {
@@ -158,10 +158,12 @@ class DoublyLinkedList<T extends Comparable<T>>
      * @param pos : the position
      * @return the data at pos, if pos is within the bounds of the list, and null otherwise.
      *
-     * Worst-case asymptotic running time cost: TODO
+     * Worst-case asymptotic running time cost: Theta(n)
      *
      * Justification:
-     *  TODO
+     *  The worst case scenario is when the input index is greater than the size of the list
+	 *  Here the method has to iterate through the list to find the index of the last node and hence the size of the list
+	 *  This iteration gives it an asymptotic running cost of Theta(n)
      *
      */
     public T get(int pos) 
@@ -185,17 +187,19 @@ class DoublyLinkedList<T extends Comparable<T>>
      * @param pos : the position to delete in the list.
      * @return true : on successful deletion, false : list has not been modified. 
      *
-     * Worst-case asymptotic running time cost: TODO
+     * Worst-case asymptotic running time cost: Theta(n)
      *
      * Justification:
-     *  TODO
+     *  The worst case scenario is when the index is greater than the size of the list
+	 *  To tell if the index is greater, it must itreate through each item to find the last index and hence the size of the list
+	 *  This iteration gives it an asymptotic running time of Theta(n)
      */
     public boolean deleteAt(int pos) 
     {
     	DLLNode currentNode = head;
 		int index = 0;
 		while (currentNode != null && index <= pos) {
-			if (pos == 0 && currentNode.next == null && currentNode.prev == null) {
+			if (pos == 0 && head == tail) {
 				deleteOnlyNode();
 				return true;
 			}
@@ -203,11 +207,15 @@ class DoublyLinkedList<T extends Comparable<T>>
 				deleteFirstNode();
 				return true;
 			}
+			
 			else if (pos == index) {
-				if (currentNode.next != null) {
-					currentNode.prev = currentNode.prev.next;
+				if (currentNode == tail) {
+					deleteLastNode();
+					return true;
 				}
+				currentNode.next.prev = currentNode.prev;
 				currentNode.prev.next = currentNode.next;
+				return true;
 			}
 			index++;
 			currentNode = currentNode.next;
@@ -223,6 +231,13 @@ class DoublyLinkedList<T extends Comparable<T>>
     public void deleteFirstNode() {
     	head = head.next;
     	head.prev = null;
+    	
+    }
+    
+    public void deleteLastNode() {
+    	tail = tail.prev;
+    	tail.next = null;
+    	
     }
 
     /**
@@ -230,10 +245,12 @@ class DoublyLinkedList<T extends Comparable<T>>
      * If the list contains "A", "B", "C", "D" before the method is called
      * Then it should contain "D", "C", "B", "A" after it returns.
      *
-     * Worst-case asymptotic running time cost: TODO
+     * Worst-case asymptotic running time cost: Theta(n)
      *
      * Justification:
-     *  TODO
+     *  There is only one scenario in this method which is the best and worst case running time
+	 *  Here the method has to iterate through each item to swap the previous and next node
+	 *  THis iteration gives the method an asymptotic worst case running cost of Theta(n)
      */
     public void reverse()
     {
@@ -257,10 +274,13 @@ class DoublyLinkedList<T extends Comparable<T>>
      * Then it should contain "A", "B", "C", "D" after it returns.
      * The relative order of elements in the resulting list should be the same as the starting list.
      *
-     * Worst-case asymptotic running time cost: TODO
+     * Worst-case asymptotic running time cost: Theta(n^2)
      *
      * Justification:
-     *  TODO
+     *  The worst case is when the list contains no duplicates
+	 *  To check for duplicates the list must compare all nodes
+	 *  The comparison algorithm conatins two nested while loops
+	 *  This gives it an asymptotic worst case running cost of Theta(n^2)
      */
      public void makeUnique()
     {
@@ -296,10 +316,12 @@ class DoublyLinkedList<T extends Comparable<T>>
      * How exactly this will be represented in the Doubly Linked List is up to the programmer.
      * @param item : the item to push on the stack
      *
-     * Worst-case asymptotic running time cost: TODO
+     * Worst-case asymptotic running time cost: Theta(1)
      *
      * Justification:
-     *  TODO
+     *  The worst case is when the method must pop onto a big list.
+	 *  Here the method only check the head node which is not affected by the size of the list.
+	 *  This gies it an asymptotic worst case running time of Theta(1)
      */
     public void push(T item) 
     {
@@ -314,10 +336,13 @@ class DoublyLinkedList<T extends Comparable<T>>
      * This method returns and removes the element that was most recently added by the push method.
      * @return the last item inserted with a push; or null when the list is empty.
      *
-     * Worst-case asymptotic running time cost: TODO
+     * Worst-case asymptotic running time cost: Theta(1)
      *
      * Justification:
-     *  TODO
+     *  The worst case is when the an item is popped from a big list
+	 *  Here while the worst case times of the get and deleteAt functions are Theta(n),
+	 *  The running time of both these functions when the index is 0 is Theta(1) as they both start checking the first node
+	 *  Thives gives an asymptotic worst-case running time of Theta(1)
      */
     public T pop() 
     {
@@ -340,29 +365,44 @@ class DoublyLinkedList<T extends Comparable<T>>
      * How exactly this will be represented in the Doubly Linked List is up to the programmer.
      * @param item : the item to be enqueued to the stack
      *
-     * Worst-case asymptotic running time cost: TODO
+     * Worst-case asymptotic running time cost: Theta(1)
      *
      * Justification:
-     *  TODO
+     *  This method just calls the push method which has a symptotic worst case cost of Theta(1)
      */
     public void enqueue(T item) 
     {
       //TODO
+    	push(item);
     }
 
      /**
      * This method returns and removes the element that was least recently added by the enqueue method.
      * @return the earliest item inserted with an equeue; or null when the list is empty.
      *
-     * Worst-case asymptotic running time cost: TODO
+     * Worst-case asymptotic running time cost: Theta(1)
      *
      * Justification:
-     *  TODO
+     *  The worst case is when an item is dequeued from a big list
+	  * Here the method calls the deleteLastNode and deleteOnyNode methods which have an asymptotic worst case running cost of Theta(1)
+	  * This gives the function an asymptotic worst case trunning cose of Theta(1)
      */
     public T dequeue() 
     {
       //TODO
-      return null;
+    	if (isEmpty()) {
+    		return null;
+    	}
+    	else if (head == tail){
+    		T value = tail.data;
+    		deleteOnlyNode();
+    		return value;	
+    	}
+    	else {
+    		T value = tail.data;
+    		deleteLastNode();
+    		return value;
+    	}
     }
  
 
@@ -398,17 +438,6 @@ class DoublyLinkedList<T extends Comparable<T>>
 
       return s.toString();
     }
-    
-    public static void main(String[] args) {
-    	DoublyLinkedList<Integer> dll = new DoublyLinkedList<Integer>();
-    	dll.insertBefore(0, 1);
-		dll.insertBefore(1, 1);
-		dll.insertBefore(2, 3);
-		dll.insertBefore(3, 1);
-		dll.insertBefore(4, 2);
-		dll.insertBefore(5, 3);
-		dll.makeUnique();
-	}
 
 }
 
