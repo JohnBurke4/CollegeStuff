@@ -38,6 +38,7 @@ public class CandC extends Node{
             this.socket = new DatagramSocket(socket);
             listener.go();
             connectToServer();
+            sendMessage();
         }
         catch (Exception e){
             e.printStackTrace();
@@ -95,6 +96,7 @@ public class CandC extends Node{
     @Override
     public synchronized void onReceipt(DatagramPacket packet) {
         // TODO Auto-generated method stub
+        System.out.println("Got something");
         try {
             String content;
             byte[] data = packet.getData();
@@ -103,9 +105,19 @@ public class CandC extends Node{
             switch (data[TYPE_POS]) {
                 case TYPE_DATA:
                     byte[] byteContent = new byte[data.length - HEADER_LENGTH];
-                    System.arraycopy(data, HEADER_LENGTH, byteContent, 0, data.length-HEADER_LENGTH);
-                    content = new String(byteContent);
-                    System.out.println(content);
+                    System.arraycopy(data, HEADER_LENGTH, byteContent, 0, data.length - HEADER_LENGTH);
+                    switch( data[NODE_POS]) {
+                        case BROKER_TYPE:
+                            BrokerCommand command = BrokerCommand.makeFromSerialized(byteContent);
+                            if (command.getComplete()){
+                                System.out.println("The command to | "+ command.getCommand() + " | is complete");
+                                sendMessage();
+                            }
+                            else {
+                                System.out.println("Something went wrong in trying to complete your command");
+                            }
+                            break;
+                    }
                     sendAck(packet.getSocketAddress());
                     break;
                 case TYPE_ACK:
@@ -130,7 +142,7 @@ public class CandC extends Node{
     public void run() {
         while(true) {
             try {
-                sendMessage();
+                //sendMessage();
             }
             catch (Exception e) {
                 // TODO: handle exception

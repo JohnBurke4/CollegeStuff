@@ -3,17 +3,26 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 
 public class BrokerCommand implements Serializable{
-    private ArrayList<SocketAddress> workerAddresses = new ArrayList<SocketAddress>();
     private SocketAddress sender;
     private String command;
     private boolean isComplete;
     private int numberOfWorkers;
+    private int numberAccepted = 0;
+    private int numberComplete = 0;
 
     public BrokerCommand(String command, SocketAddress sender, int numberOfWorkers){
         this.command = command;
         this.sender = sender;
         this.numberOfWorkers = numberOfWorkers;
     }
+
+    public void incrememtNumberAccepted() { numberAccepted++; }
+
+    public void incrementNumberComplete() { numberComplete++; }
+
+    public int getNumberNumberAccepted() { return numberAccepted; }
+
+    public int getNumberComplete() {return numberComplete; }
 
     public void setCommand(String command){
         this.command = command;
@@ -23,20 +32,12 @@ public class BrokerCommand implements Serializable{
         return command;
     }
 
-    public void setComplete(boolean complete){
-        this.isComplete = complete;
+    public void setComplete(){
+        this.isComplete = (numberComplete >= numberOfWorkers);
     }
 
     public boolean getComplete(){
         return isComplete;
-    }
-
-    public void addWorker(SocketAddress workerAddress) {
-        workerAddresses.add(workerAddress);
-    }
-
-    public boolean isWorker(SocketAddress workerAddress){
-        return workerAddresses.contains(workerAddress);
     }
 
     public void setSender(SocketAddress sender){
@@ -93,6 +94,7 @@ public class BrokerCommand implements Serializable{
     public class WorkerCommand implements Serializable{
         private boolean complete;
         private String command;
+        private boolean accepted;
 
         public WorkerCommand(String command){
             this.command = command;
@@ -110,8 +112,13 @@ public class BrokerCommand implements Serializable{
             return command;
         }
 
+        public boolean getAccepted() { return accepted; }
 
+        public void setAccepted(boolean accepted) { this.accepted = accepted; }
+    }
 
+    public WorkerCommand createWorkerCommand(){
+        return new WorkerCommand(this.command);
     }
 
     public static byte[] getWorkerSerializable(WorkerCommand command){

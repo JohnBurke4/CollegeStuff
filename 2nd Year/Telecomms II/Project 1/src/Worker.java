@@ -32,6 +32,8 @@ public class Worker extends Node{
 
 	private boolean connected = false;
 	private boolean ackRecieved = false;
+
+	private BrokerCommand.WorkerCommand currentCommand = null;
 	
 	
 	
@@ -93,8 +95,9 @@ public class Worker extends Node{
 				case TYPE_DATA:
 					byte[] byteContent = new byte[data.length - HEADER_LENGTH];
 					System.arraycopy(data, HEADER_LENGTH, byteContent, 0, data.length-HEADER_LENGTH);
-					content = new String(byteContent);
-					System.out.println("Command said: " + content);
+					BrokerCommand.WorkerCommand command = BrokerCommand.makeWorkerFromSerialized(byteContent);
+					System.out.println("Command said: " + command.getCommand());
+					currentCommand = command;
 					sendAck(packet.getSocketAddress());
 					acceptOrDeclineOrder();
 					break;
@@ -137,6 +140,9 @@ public class Worker extends Node{
 			}
 			try {
 				sendOrderReply(accepted);
+				if (accepted){
+					sayIfFinished();
+				}
 			}
 			catch (Exception e){
 				e.printStackTrace();
@@ -144,20 +150,42 @@ public class Worker extends Node{
 		}
 	}
 
-	public void sendOrderReply(boolean accepted) throws IOException {
-		byte[] data = new byte[HEADER_LENGTH];
+	public synchronized void sendOrderReply(boolean accepted) throws IOException {
+		currentCommand.setAccepted(accepted);
+		byte[] command = BrokerCommand.getWorkerSerializable(currentCommand);
+		byte[] data = new byte[HEADER_LENGTH + command.length];
+
 		DatagramPacket packet = null;
-		if (accepted){
-			data[TYPE_POS] = TYPE_ORDER_ACCERPTED;
-		}
-		else{
-			data[TYPE_POS] = TYPE_ORDER_DECLINED;
-		}
+		data[TYPE_POS] = TYPE_DATA;
 		data[FRAME_POS] = 0;
 		data[NODE_POS] = WORKER_TYPE;
+		data[LENGTH_POS] = (byte) command.length;
+		System.arraycopy(command, 0, data, HEADER_LENGTH, command.length);
 		packet = new DatagramPacket(data, data.length);
 		packet.setSocketAddress(brokerAddress);
 		socket.send(packet);
+	}
+
+	public void sayIfFinished(){
+
+		boolean correctInput = false;
+		while (!correctInput) {
+			System.out.println("Press [F] if you have finished the order, anything else to see the order again");
+			Scanner sc = new Scanner(System.in);
+			if (sc.hasNext("F")) {
+				correctInput = true;
+				currentCommand.setComplete(true);
+			} else {
+				System.out.println("Current Order: " + currentCommand.getCommand());
+				continue;
+			}
+			try {
+				sendOrderReply(true);
+			}
+			catch (Exception e){
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	@Override
