@@ -6,32 +6,13 @@ import java.net.SocketAddress;
 import java.util.Scanner;
 
 public class Worker extends Node{
-	private final byte TYPE_DATA = 0;
-	private final byte TYPE_ACK = 1;
-	private final byte TYPE_CONNECTION = 2;
-	private final byte TYPE_CONNECTION_ACK = 3;
-	private final byte TYPE_ORDER_ACCERPTED = 4;
-	private final byte TYPE_ORDER_DECLINED = 5;
-	private final int TYPE_POS = 0;
-	
-	private final byte FRAME_1 = 0;
-	private final byte FRAME_2 = 1;
-	private final byte FRAME_3 = 2;
-	private final byte FRAME_4 = 3;
-	private final int FRAME_POS = 1;
 
-	private final int NODE_POS = 2;
-	
-	private final int LENGTH_POS = 3;
-	private final int HEADER_LENGTH = 4;
-	
 	private final int BROKER_SOCKET = 45000;
 	private final String BROKER_NODE = "localhost";
 	
 	InetSocketAddress brokerAddress;
 
 	private boolean connected = false;
-	private boolean ackRecieved = false;
 
 	private BrokerCommand.WorkerCommand currentCommand = null;
 	
@@ -49,48 +30,22 @@ public class Worker extends Node{
 		}
 		
 	}
-	
-	
 
 	@Override
 	public synchronized void sendMessage() throws Exception {
-		// TODO Auto-generated method stub
-		byte[] data = null;
-		DatagramPacket packet = null;
-		String toSend = "Hello world";
-		byte[] message = toSend.getBytes();
-		data = new byte[message.length + HEADER_LENGTH];
-		data[TYPE_POS] = TYPE_DATA;
-		data[FRAME_POS] = 0;
-		data[NODE_POS] = WORKER_TYPE;
-		data[LENGTH_POS] = (byte) message.length;
-		System.arraycopy(message, 0, data, HEADER_LENGTH, message.length);
-		packet = new DatagramPacket(data, data.length);
-		packet.setSocketAddress(brokerAddress);
-		socket.send(packet);
-		this.wait();
 		
 	}
 
 	@Override
 	public synchronized void sendAck(SocketAddress returnAddress) throws Exception {
-		byte[] data = new byte[HEADER_LENGTH];
-		DatagramPacket packet = null;
-		data[TYPE_POS] = TYPE_ACK;
-		data[FRAME_POS] = 0;
-		data[NODE_POS] = WORKER_TYPE;
-		packet = new DatagramPacket(data, data.length);
-		packet.setSocketAddress(returnAddress);
-		socket.send(packet);
+		socket.send(makePacket(returnAddress, null, TYPE_ACK, FRAME_1, WORKER_TYPE));
 		System.out.println("Ack sent");
 	}
+
 	@Override
 	public synchronized void onReceipt(DatagramPacket packet) {
 		try {
-			String content;
 			byte[] data = packet.getData();
-
-
 			switch (data[TYPE_POS]) {
 				case TYPE_DATA:
 					byte[] byteContent = new byte[data.length - HEADER_LENGTH];
@@ -153,19 +108,10 @@ public class Worker extends Node{
 	public synchronized void sendOrderReply(boolean accepted) throws IOException {
 		currentCommand.setAccepted(accepted);
 		byte[] command = BrokerCommand.getWorkerSerializable(currentCommand);
-		byte[] data = new byte[HEADER_LENGTH + command.length];
 		if (!currentCommand.getAccepted()){
 			System.out.println("Sending refusal");
 		}
-		DatagramPacket packet = null;
-		data[TYPE_POS] = TYPE_DATA;
-		data[FRAME_POS] = 0;
-		data[NODE_POS] = WORKER_TYPE;
-		data[LENGTH_POS] = (byte) command.length;
-		System.arraycopy(command, 0, data, HEADER_LENGTH, command.length);
-		packet = new DatagramPacket(data, data.length);
-		packet.setSocketAddress(brokerAddress);
-		socket.send(packet);
+		socket.send(makePacket(brokerAddress, command, TYPE_DATA, FRAME_1, WORKER_TYPE));
 	}
 
 	public void sayIfFinished(){
@@ -197,7 +143,6 @@ public class Worker extends Node{
 			//sendMessage();
 			}
 			catch (Exception e) {
-				// TODO: handle exception
 				e.printStackTrace();
 			}
 		}
@@ -206,14 +151,7 @@ public class Worker extends Node{
 	@Override
 	public synchronized void connectToServer() throws Exception {
 		while (!connected){
-			byte[] data = new byte[HEADER_LENGTH];
-			DatagramPacket packet = null;
-			data[TYPE_POS] = TYPE_CONNECTION;
-			data[FRAME_POS] = 0;
-			data[NODE_POS] = WORKER_TYPE;
-			packet = new DatagramPacket(data, data.length);
-			packet.setSocketAddress(brokerAddress);
-			socket.send(packet);
+			socket.send(makePacket(brokerAddress, null, TYPE_CONNECTION, FRAME_1, WORKER_TYPE));
 			System.out.println("No connection yet, trying again...");
 			this.wait(2000);
 
@@ -226,7 +164,7 @@ public class Worker extends Node{
 			worker1.run();
 		}
 		catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 		}
 	}
 

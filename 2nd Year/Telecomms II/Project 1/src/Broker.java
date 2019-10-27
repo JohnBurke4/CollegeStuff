@@ -9,23 +9,8 @@ import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 
 public class Broker extends Node {
-    private final byte TYPE_DATA = 0;
-    private final byte TYPE_ACK = 1;
-    private final byte TYPE_CONNECTION = 2;
-    private final byte TYPE_CONNECTION_ACK = 3;
-    private final byte TYPE_ORDER_ACCERPTED = 4;
-    private final byte TYPE_ORDER_DECLINED = 5;
-    private final int TYPE_POS = 0;
-
-
-
-    private final int NODE_POS = 2;
-
-    private final int LENGTH_POS = 3;
-    private final int HEADER_LENGTH = 4;
 
     private final int BROKER_SOCKET = 45000;
-    private final int BROKER_OUT_SOCKET = 45001;
     private final String BROKER_NODE = "localhost";
     private BrokerCommand currentOrder = null;
 
@@ -60,37 +45,17 @@ public class Broker extends Node {
 
     @Override
     public synchronized void sendMessage() throws Exception {
-        // TODO Auto-generated method stub
-        byte[] data = null;
-        DatagramPacket packet = null;
         BrokerCommand command = getCurrentOrder();
         BrokerCommand.WorkerCommand commandToSend = command.createWorkerCommand();
         byte[] message = BrokerCommand.getWorkerSerializable(commandToSend);
-        data = new byte[message.length + HEADER_LENGTH];
-
-        data[TYPE_POS] = TYPE_DATA;
-        data[FRAME_POS] = 0;
-        data[NODE_POS] = BROKER_TYPE;
-        data[LENGTH_POS] = (byte) message.length;
-        System.arraycopy(message, 0, data, HEADER_LENGTH, message.length);
-        packet = new DatagramPacket(data, data.length);
         for (SocketAddress currentWorkerAddress : workerAddresses) {
-            packet.setSocketAddress(currentWorkerAddress);
-            socket.send(packet);
+            socket.send(makePacket(currentWorkerAddress, message, TYPE_DATA, FRAME_1, BROKER_TYPE));
         }
     }
 
     @Override
     public synchronized void sendAck(SocketAddress returnAddress) throws Exception {
-        // TODO Auto-generated method stub
-        byte[] data = new byte[HEADER_LENGTH];
-        DatagramPacket packet = null;
-        data[TYPE_POS] = TYPE_ACK;
-        data[FRAME_POS] = 0;
-        data[NODE_POS] = BROKER_TYPE;
-        packet = new DatagramPacket(data, data.length);
-        packet.setSocketAddress(returnAddress);
-        socket.send(packet);
+        socket.send(makePacket(returnAddress, null, TYPE_ACK, FRAME_1, BROKER_TYPE));
     }
 
     @Override
@@ -123,8 +88,6 @@ public class Broker extends Node {
                             }
                             break;
                         case C_AND_C_TYPE:
-                            //setCurrentOrder(content.trim());
-
                             BrokerCommand command = BrokerCommand.makeFromSerialized(byteContent);
                             setCurrentOrder(command);
                             getCurrentOrder().setSender(packet.getSocketAddress());
@@ -133,7 +96,6 @@ public class Broker extends Node {
                             break;
                     }
 
-                    //System.out.println(content);
                     sendAck(packet.getSocketAddress());
                     break;
                 case TYPE_ACK:
@@ -175,19 +137,8 @@ public class Broker extends Node {
     }
 
     public void sendCommandBackToCAndC(BrokerCommand command) throws IOException {
-		byte[] data = null;
-		DatagramPacket packet = null;
 		byte[] message = BrokerCommand.getSerialized(command);
-		data = new byte[message.length + HEADER_LENGTH];
-
-		data[TYPE_POS] = TYPE_DATA;
-		data[FRAME_POS] = 0;
-		data[NODE_POS] = BROKER_TYPE;
-		data[LENGTH_POS] = (byte) message.length;
-		System.arraycopy(message, 0, data, HEADER_LENGTH, message.length);
-		packet = new DatagramPacket(data, data.length);
-		packet.setSocketAddress(command.getSender());
-		socket.send(packet);
+        socket.send(makePacket(command.getSender(), message, TYPE_DATA, FRAME_1, BROKER_TYPE));
 		System.out.println("Sent command back");
 
 	}
@@ -199,14 +150,7 @@ public class Broker extends Node {
     }
 
     public void sendConnectionAck(SocketAddress address) throws Exception {
-        byte[] data = new byte[HEADER_LENGTH];
-        DatagramPacket packet = null;
-        data[TYPE_POS] = TYPE_CONNECTION_ACK;
-        data[FRAME_POS] = 0;
-        data[NODE_POS] = BROKER_TYPE;
-        packet = new DatagramPacket(data, data.length);
-        packet.setSocketAddress(address);
-        socket.send(packet);
+        socket.send(makePacket(address, null, TYPE_CONNECTION_ACK, FRAME_1, BROKER_TYPE));
     }
 
     public static void main(String[] args) {

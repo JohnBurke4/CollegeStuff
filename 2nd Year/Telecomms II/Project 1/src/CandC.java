@@ -7,11 +7,6 @@ import java.util.Scanner;
 
 public class CandC extends Node{
 
-    private final int NODE_POS = 2;
-
-    private final int LENGTH_POS = 3;
-    private final int HEADER_LENGTH = 4;
-
     private final int BROKER_SOCKET = 45000;
     private final String BROKER_NODE = "localhost";
 
@@ -35,28 +30,11 @@ public class CandC extends Node{
 
     }
 
-
-
     @Override
     public synchronized void sendMessage() throws Exception {
-        // TODO Auto-generated method stub
-
-        byte[] data = null;
-        DatagramPacket packet = null;
-
-
         byte[] command = BrokerCommand.getSerialized(createCommand());
-        data = new byte[command.length + HEADER_LENGTH];
-        data[TYPE_POS] = TYPE_DATA;
-        data[FRAME_POS] = 0;
-        data[NODE_POS] = C_AND_C_TYPE;
-        data[LENGTH_POS] = (byte) command.length;
-        System.arraycopy(command, 0, data, HEADER_LENGTH, command.length);
-        packet = new DatagramPacket(data, data.length);
-        packet.setSocketAddress(brokerAddress);
-        socket.send(packet);
+        socket.send(makePacket(brokerAddress, command, TYPE_DATA, FRAME_1, C_AND_C_TYPE));
         System.out.println("Sent command");
-        this.wait();
     }
 
     public BrokerCommand createCommand(){
@@ -72,25 +50,12 @@ public class CandC extends Node{
 
     @Override
     public synchronized void sendAck(SocketAddress returnAddress) throws Exception {
-        // TODO Auto-generated method stub
-        byte[] data = new byte[HEADER_LENGTH];
-        DatagramPacket packet = null;
-        data[TYPE_POS] = TYPE_ACK;
-        data[FRAME_POS] = 0;
-        data[NODE_POS] = C_AND_C_TYPE;
-        packet = new DatagramPacket(data, data.length);
-        packet.setSocketAddress(returnAddress);
-        socket.send(packet);
+        socket.send(makePacket(returnAddress, null, TYPE_ACK, FRAME_1, C_AND_C_TYPE));
     }
     @Override
     public synchronized void onReceipt(DatagramPacket packet) {
-        // TODO Auto-generated method stub
-        System.out.println("Got something");
         try {
-            String content;
             byte[] data = packet.getData();
-
-
             switch (data[TYPE_POS]) {
                 case TYPE_DATA:
                     byte[] byteContent = new byte[data.length - HEADER_LENGTH];
@@ -123,18 +88,14 @@ public class CandC extends Node{
         catch(Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     @Override
     public void run() {
         while(true) {
             try {
-                //sendMessage();
             }
             catch (Exception e) {
-                // TODO: handle exception
                 e.printStackTrace();
             }
         }
@@ -144,14 +105,7 @@ public class CandC extends Node{
     @Override
     public synchronized void connectToServer() throws Exception {
         while (!connected){
-            byte[] data = new byte[HEADER_LENGTH];
-            DatagramPacket packet = null;
-            data[TYPE_POS] = TYPE_CONNECTION;
-            data[FRAME_POS] = 0;
-            data[NODE_POS] = C_AND_C_TYPE;
-            packet = new DatagramPacket(data, data.length);
-            packet.setSocketAddress(brokerAddress);
-            socket.send(packet);
+            socket.send(makePacket(brokerAddress, null, TYPE_CONNECTION, FRAME_1, C_AND_C_TYPE));
             System.out.println("No connection yet, trying again...");
             this.wait(2000);
 
@@ -164,7 +118,7 @@ public class CandC extends Node{
             candc.run();
         }
         catch (Exception e) {
-            // TODO: handle exception
+            e.printStackTrace();
         }
     }
 

@@ -7,10 +7,6 @@ import java.util.concurrent.CountDownLatch;
 
 public abstract class Node {
 	static final int PACKET_SIZE = 65536;
-	public final byte WORKER_TYPE = 0;
-	public final byte C_AND_C_TYPE = 1;
-	public final byte BROKER_TYPE = 2;
-
 
 	public final byte TYPE_DATA = 0;
 	public final byte TYPE_ACK = 1;
@@ -23,6 +19,14 @@ public abstract class Node {
 	public final byte FRAME_3 = 2;
 	public final byte FRAME_4 = 3;
 	public final int FRAME_POS = 1;
+
+	public final byte WORKER_TYPE = 0;
+	public final byte C_AND_C_TYPE = 1;
+	public final byte BROKER_TYPE = 2;
+	public final int NODE_POS = 2;
+
+	public final int LENGTH_POS = 3;
+	public final int HEADER_LENGTH = 4;
 	
 	DatagramSocket socket;
 	Listener listener;
@@ -33,6 +37,30 @@ public abstract class Node {
 		listener = new Listener();
 		listener.setDaemon(true);
 		listener.start();
+	}
+
+	public DatagramPacket makePacket(SocketAddress address, byte[] message, byte type, byte frame, byte node){
+		if (type == TYPE_DATA) {
+			byte[] data = new byte[HEADER_LENGTH + message.length];
+			data[TYPE_POS] = type;
+			data[FRAME_POS] = frame;
+			data[NODE_POS] = node;
+			data[LENGTH_POS] = (byte) message.length;
+			System.arraycopy(message, 0, data, HEADER_LENGTH, message.length);
+			DatagramPacket packet = new DatagramPacket(data, data.length);
+			packet.setSocketAddress(address);
+			return packet;
+
+		} else{
+			byte[] header = new byte[HEADER_LENGTH];
+			header[TYPE_POS] = type;
+			header[FRAME_POS] = frame;
+			header[NODE_POS] = node;
+			header[LENGTH_POS] = 0;
+			DatagramPacket packet = new DatagramPacket(header, header.length);
+			packet.setSocketAddress(address);
+			return packet;
+		}
 	}
 	
 	public abstract void sendMessage() throws Exception;
