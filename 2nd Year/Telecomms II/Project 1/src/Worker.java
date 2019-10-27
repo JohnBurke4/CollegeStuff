@@ -154,7 +154,9 @@ public class Worker extends Node{
 		currentCommand.setAccepted(accepted);
 		byte[] command = BrokerCommand.getWorkerSerializable(currentCommand);
 		byte[] data = new byte[HEADER_LENGTH + command.length];
-
+		if (!currentCommand.getAccepted()){
+			System.out.println("Sending refusal");
+		}
 		DatagramPacket packet = null;
 		data[TYPE_POS] = TYPE_DATA;
 		data[FRAME_POS] = 0;

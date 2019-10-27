@@ -17,11 +17,6 @@ public class Broker extends Node {
     private final byte TYPE_ORDER_DECLINED = 5;
     private final int TYPE_POS = 0;
 
-    private final byte FRAME_1 = 0;
-    private final byte FRAME_2 = 1;
-    private final byte FRAME_3 = 2;
-    private final byte FRAME_4 = 3;
-    private final int FRAME_POS = 1;
 
 
     private final int NODE_POS = 2;
@@ -33,6 +28,8 @@ public class Broker extends Node {
     private final int BROKER_OUT_SOCKET = 45001;
     private final String BROKER_NODE = "localhost";
     private BrokerCommand currentOrder = null;
+
+    private ArrayList<BrokerCommand> backlog = new ArrayList<BrokerCommand>();
 
     InetSocketAddress brokerAddress;
 
@@ -122,6 +119,7 @@ public class Broker extends Node {
                                 System.out.println("Accepted");
                             } else {
                                 System.out.println("Declined");
+                                backlog.add(getCurrentOrder());
                             }
                             break;
                         case C_AND_C_TYPE:

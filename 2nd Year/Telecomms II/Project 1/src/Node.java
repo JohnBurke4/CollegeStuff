@@ -10,6 +10,19 @@ public abstract class Node {
 	public final byte WORKER_TYPE = 0;
 	public final byte C_AND_C_TYPE = 1;
 	public final byte BROKER_TYPE = 2;
+
+
+	public final byte TYPE_DATA = 0;
+	public final byte TYPE_ACK = 1;
+	public final byte TYPE_CONNECTION = 2;
+	public final byte TYPE_CONNECTION_ACK = 3;
+	public final int TYPE_POS = 0;
+
+	public final byte FRAME_1 = 0;
+	public final byte FRAME_2 = 1;
+	public final byte FRAME_3 = 2;
+	public final byte FRAME_4 = 3;
+	public final int FRAME_POS = 1;
 	
 	DatagramSocket socket;
 	Listener listener;

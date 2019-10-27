@@ -6,17 +6,6 @@ import java.net.SocketAddress;
 import java.util.Scanner;
 
 public class CandC extends Node{
-    private final byte TYPE_DATA = 0;
-    private final byte TYPE_ACK = 1;
-    private final byte TYPE_CONNECTION = 2;
-    private final byte TYPE_CONNECTION_ACK = 3;
-    private final int TYPE_POS = 0;
-
-    private final byte FRAME_1 = 0;
-    private final byte FRAME_2 = 1;
-    private final byte FRAME_3 = 2;
-    private final byte FRAME_4 = 3;
-    private final int FRAME_POS = 1;
 
     private final int NODE_POS = 2;
 
@@ -150,6 +139,7 @@ public class CandC extends Node{
             }
         }
     }
+
 
     @Override
     public synchronized void connectToServer() throws Exception {
