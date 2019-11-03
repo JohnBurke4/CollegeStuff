@@ -1,180 +1,162 @@
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Scanner;
+import java.util.ArrayList;
 
-public class CandC extends Node{
-    private final byte TYPE_DATA = 0;
-    private final byte TYPE_ACK = 1;
-    private final byte TYPE_CONNECTION = 2;
-    private final byte TYPE_CONNECTION_ACK = 3;
-    private final int TYPE_POS = 0;
-
-    private final byte FRAME_1 = 0;
-    private final byte FRAME_2 = 1;
-    private final byte FRAME_3 = 2;
-    private final byte FRAME_4 = 3;
-    private final int FRAME_POS = 1;
-
-    private final int NODE_POS = 2;
-
-    private final int LENGTH_POS = 3;
-    private final int HEADER_LENGTH = 4;
+public class CandC extends Node {
 
     private final int BROKER_SOCKET = 45000;
     private final String BROKER_NODE = "localhost";
 
+
     private boolean connected = false;
+    private boolean commandRecieved = false;
+
+    private ArrayList<DatagramPacket> commandPackets = new ArrayList<DatagramPacket>();
+    private ArrayList<byte[]> incomingPackets = new ArrayList<byte[]>();
 
     InetSocketAddress brokerAddress;
+    Terminal terminal;
 
-
-
-    public CandC(int socket) {
+    public CandC(Terminal terminal, int socket) {
         try {
             brokerAddress = new InetSocketAddress(BROKER_NODE, BROKER_SOCKET);
             this.socket = new DatagramSocket(socket);
             listener.go();
+            this.terminal = terminal;
             connectToServer();
             sendMessage();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
-
-
 
     @Override
     public synchronized void sendMessage() throws Exception {
-        // TODO Auto-generated method stub
-
-        byte[] data = null;
-        DatagramPacket packet = null;
-
-
         byte[] command = BrokerCommand.getSerialized(createCommand());
-        data = new byte[command.length + HEADER_LENGTH];
-        data[TYPE_POS] = TYPE_DATA;
-        data[FRAME_POS] = 0;
-        data[NODE_POS] = C_AND_C_TYPE;
-        data[LENGTH_POS] = (byte) command.length;
-        System.arraycopy(command, 0, data, HEADER_LENGTH, command.length);
-        packet = new DatagramPacket(data, data.length);
-        packet.setSocketAddress(brokerAddress);
-        socket.send(packet);
-        System.out.println("Sent command");
-        this.wait();
+        splitPacketIntoSmallerPackets(command, commandPackets, brokerAddress, C_AND_C_TYPE);
+        for (int i = 0; i < commandPackets.size(); i++) {
+            socket.send(commandPackets.get(i));
+            this.wait(2);
+            if (i % 2 == 1) {
+                while (!frameGroupPart1Recieved || !frameGroupPart2Recieved) {
+                    terminal.println("Sending packets again");
+                    wait(4);
+                    socket.send(commandPackets.get(i));
+                    socket.send(commandPackets.get(i - 1));
+                }
+                frameGroupPart1Recieved = false;
+                frameGroupPart2Recieved = false;
+            }
+
+        }
+        resetFraming();
+        terminal.println("Sent command");
     }
 
-    public BrokerCommand createCommand(){
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Please issue the command you wish to send: ");
-        String command = sc.nextLine();
-        System.out.println("Please input the amount of workers needed: ");
-        int workers = sc.nextInt();
+    public void resetFraming() {
+        commandPackets.clear();
+        currentFrameGroup = 0;
+    }
+
+    public BrokerCommand createCommand() {
+        terminal.println("Please issue the command you wish to send: ");
+        String command = terminal.read("Command");
+        terminal.println("Please input the amount of workers needed: ");
+        int workers = Integer.parseInt(terminal.read("Workers:"));
         BrokerCommand commandToSend = new BrokerCommand(command, null, workers);
+        commandToSend.setPadding(2000);
         return commandToSend;
     }
 
 
     @Override
-    public synchronized void sendAck(SocketAddress returnAddress) throws Exception {
-        // TODO Auto-generated method stub
-        byte[] data = new byte[HEADER_LENGTH];
-        DatagramPacket packet = null;
-        data[TYPE_POS] = TYPE_ACK;
-        data[FRAME_POS] = 0;
-        data[NODE_POS] = C_AND_C_TYPE;
-        packet = new DatagramPacket(data, data.length);
-        packet.setSocketAddress(returnAddress);
-        socket.send(packet);
+    public synchronized void sendAck(SocketAddress returnAddress, byte frameNumber) throws Exception {
+        socket.send(makePacket(returnAddress, null, TYPE_ACK, frameNumber, C_AND_C_TYPE, HEADER_PACKET_COUNT));
     }
+
     @Override
     public synchronized void onReceipt(DatagramPacket packet) {
-        // TODO Auto-generated method stub
-        System.out.println("Got something");
         try {
-            String content;
             byte[] data = packet.getData();
-
-
             switch (data[TYPE_POS]) {
                 case TYPE_DATA:
                     byte[] byteContent = new byte[data.length - HEADER_LENGTH];
                     System.arraycopy(data, HEADER_LENGTH, byteContent, 0, data.length - HEADER_LENGTH);
-                    switch( data[NODE_POS]) {
+                    switch (data[NODE_POS]) {
                         case BROKER_TYPE:
-                            BrokerCommand command = BrokerCommand.makeFromSerialized(byteContent);
-                            if (command.getComplete()){
-                                System.out.println("The command to | "+ command.getCommand() + " | is complete");
-                                sendMessage();
+                            // simulates packetloss
+                            if (Math.random() > PACKET_LOSS_PERCENT) {
+                                commandPacketFraming(data, packet.getSocketAddress(), incomingPackets, terminal);
                             }
-                            else {
-                                System.out.println("Something went wrong in trying to complete your command");
+                            if (incomingPackets.size() == data[PACKET_NUMBER_POSITION]) {
+                                terminal.println("All packets recieved");
+                                commandRecieved = true;
                             }
+
                             break;
+                        default:
+                            terminal.println("Error in Node who sent message, wrong node type;");
                     }
-                    sendAck(packet.getSocketAddress());
                     break;
+
+
                 case TYPE_ACK:
-                    System.out.println("Ack recieved");
+                    dealWithAckFrame(data, terminal);
                     break;
                 case TYPE_CONNECTION_ACK:
-                    System.out.println("Connected to server");
+                    terminal.println("Connected to server");
                     connected = true;
                     break;
                 default:
-                    System.out.println("Error, wrong data type");
+                    terminal.println("Error, wrong data type");
             }
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     @Override
-    public void run() {
-        while(true) {
+    public synchronized void run() {
+        while (true) {
             try {
-                //sendMessage();
-            }
-            catch (Exception e) {
-                // TODO: handle exception
+                wait(100);
+                if (commandRecieved) {
+                    BrokerCommand command = BrokerCommand.makeFromSerialized(putCommandPacketsTogether(incomingPackets));
+                    incomingPackets.clear();
+                    if (command.getComplete()) {
+                        terminal.println("The command to | " + command.getCommand() + " | is complete");
+                        sendMessage();
+                    } else {
+                        terminal.println("Something went wrong in trying to complete your command");
+                    }
+                    commandRecieved = false;
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
+
     @Override
     public synchronized void connectToServer() throws Exception {
-        while (!connected){
-            byte[] data = new byte[HEADER_LENGTH];
-            DatagramPacket packet = null;
-            data[TYPE_POS] = TYPE_CONNECTION;
-            data[FRAME_POS] = 0;
-            data[NODE_POS] = C_AND_C_TYPE;
-            packet = new DatagramPacket(data, data.length);
-            packet.setSocketAddress(brokerAddress);
-            socket.send(packet);
-            System.out.println("No connection yet, trying again...");
-            this.wait(2000);
+        while (!connected) {
+            socket.send(makePacket(brokerAddress, null, TYPE_CONNECTION, FRAME_1, C_AND_C_TYPE, HEADER_PACKET_COUNT));
+            terminal.println("No connection yet, trying again...");
+            this.wait(3000);
 
         }
     }
 
     public static void main(String[] args) {
         try {
-            CandC candc = new CandC(50010);
+            Terminal terminal = new Terminal("Command & Control");
+            CandC candc = new CandC(terminal, 50010);
             candc.run();
-        }
-        catch (Exception e) {
-            // TODO: handle exception
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

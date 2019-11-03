@@ -2,49 +2,84 @@ import java.io.*;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 
-public class BrokerCommand implements Serializable{
+public class BrokerCommand implements Serializable {
     private SocketAddress sender;
     private String command;
     private boolean isComplete;
     private int numberOfWorkers;
     private int numberAccepted = 0;
+    private int numberOrdersSend = 0;
     private int numberComplete = 0;
+    private byte[] padding;
 
-    public BrokerCommand(String command, SocketAddress sender, int numberOfWorkers){
+    public BrokerCommand(String command, SocketAddress sender, int numberOfWorkers) {
         this.command = command;
         this.sender = sender;
         this.numberOfWorkers = numberOfWorkers;
     }
 
-    public void incrememtNumberAccepted() { numberAccepted++; }
+    public void setPadding(int size) {
+        padding = new byte[size];
+    }
 
-    public void incrementNumberComplete() { numberComplete++; }
 
-    public int getNumberNumberAccepted() { return numberAccepted; }
+    public int getWorkersNeeded() {
+        return (numberOrdersSend - numberComplete);
+    }
 
-    public int getNumberComplete() {return numberComplete; }
+    public void incrementNumberOrdersSent() {
+        numberOrdersSend++;
+    }
 
-    public void setCommand(String command){
+    public void decrementNumberOrdersSent() {
+        numberOrdersSend--;
+    }
+
+    public boolean checkIfEnoughOrdersSent() {
+        return numberOrdersSend >= numberOfWorkers;
+    }
+
+    public int getNumberOfOrdersSent() {
+        return numberOrdersSend;
+    }
+
+    public void incrememtNumberAccepted() {
+        numberAccepted++;
+    }
+
+    public void incrementNumberComplete() {
+        numberComplete++;
+    }
+
+    public int getNumberNumberAccepted() {
+        return numberAccepted;
+    }
+
+    public int getNumberComplete() {
+        return numberComplete;
+    }
+
+    public void setCommand(String command) {
         this.command = command;
     }
 
-    public String getCommand(){
+    public String getCommand() {
         return command;
     }
 
-    public void setComplete(){
+    public void setComplete() {
         this.isComplete = (numberComplete >= numberOfWorkers);
     }
 
-    public boolean getComplete(){
+    public boolean getComplete() {
         return isComplete;
     }
 
-    public void setSender(SocketAddress sender){
+    public void setSender(SocketAddress sender) {
         this.sender = sender;
     }
 
-    public SocketAddress getSender(){
+    public SocketAddress getSender() {
         return sender;
     }
 
@@ -58,7 +93,7 @@ public class BrokerCommand implements Serializable{
             out.flush();
             serialized = bos.toByteArray();
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
@@ -70,14 +105,14 @@ public class BrokerCommand implements Serializable{
         return serialized;
     }
 
-    public static BrokerCommand makeFromSerialized(byte[] serial){
+    public static BrokerCommand makeFromSerialized(byte[] serial) {
         ByteArrayInputStream bis = new ByteArrayInputStream(serial);
         ObjectInput in = null;
         BrokerCommand command = null;
         try {
             in = new ObjectInputStream(bis);
             command = (BrokerCommand) in.readObject();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
@@ -91,76 +126,5 @@ public class BrokerCommand implements Serializable{
         return command;
     }
 
-    public class WorkerCommand implements Serializable{
-        private boolean complete;
-        private String command;
-        private boolean accepted;
 
-        public WorkerCommand(String command){
-            this.command = command;
-        }
-
-        public void setComplete(boolean complete){
-            this.complete = complete;
-        }
-
-        public boolean getComplete(){
-            return complete;
-        }
-
-        public String getCommand(){
-            return command;
-        }
-
-        public boolean getAccepted() { return accepted; }
-
-        public void setAccepted(boolean accepted) { this.accepted = accepted; }
-    }
-
-    public WorkerCommand createWorkerCommand(){
-        return new WorkerCommand(this.command);
-    }
-
-    public static byte[] getWorkerSerializable(WorkerCommand command){
-        byte[] serialized = null;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out = null;
-        try {
-            out = new ObjectOutputStream(bos);
-            out.writeObject(command);
-            out.flush();
-            serialized = bos.toByteArray();
-
-        }catch(Exception e){
-            e.printStackTrace();
-        } finally {
-            try {
-                bos.close();
-            } catch (Exception e) {
-
-            }
-        }
-        return serialized;
-    }
-
-    public static WorkerCommand makeWorkerFromSerialized(byte[] serial){
-        ByteArrayInputStream bis = new ByteArrayInputStream(serial);
-        ObjectInput in = null;
-        WorkerCommand command = null;
-        try {
-            in = new ObjectInputStream(bis);
-            command = (WorkerCommand) in.readObject();
-        } catch (Exception e){
-            e.printStackTrace();
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException ex) {
-                // ignore close exception
-            }
-        }
-        return command;
-    }
 }
