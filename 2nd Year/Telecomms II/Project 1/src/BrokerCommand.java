@@ -18,7 +18,7 @@ public class BrokerCommand implements Serializable {
         this.numberOfWorkers = numberOfWorkers;
     }
 
-    public void setPadding(int size){
+    public void setPadding(int size) {
         padding = new byte[size];
     }
 
@@ -32,7 +32,7 @@ public class BrokerCommand implements Serializable {
     }
 
     public void decrementNumberOrdersSent() {
-        numberOrdersSend++;
+        numberOrdersSend--;
     }
 
     public boolean checkIfEnoughOrdersSent() {
@@ -125,10 +125,6 @@ public class BrokerCommand implements Serializable {
         }
         return command;
     }
-
-
-
-
 
 
 }

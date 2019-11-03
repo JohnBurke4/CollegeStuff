@@ -9,6 +9,7 @@ import java.util.concurrent.CountDownLatch;
 
 public abstract class Node {
     static final int PACKET_SIZE = 1024;
+    static final double PACKET_LOSS_PERCENT = 0.0;
 
     public final byte TYPE_DATA = 0;
     public final byte TYPE_ACK = 1;
@@ -76,17 +77,15 @@ public abstract class Node {
         }
     }
 
-    public void splitPacketIntoSmallerPackets(byte[] command, ArrayList<DatagramPacket> commandPackets, SocketAddress brokerAddress, byte nodeType){
+    public void splitPacketIntoSmallerPackets(byte[] command, ArrayList<DatagramPacket> commandPackets, SocketAddress brokerAddress, byte nodeType) {
         int index = 0;
         int frameIndex = 0;
         int numOfPackets = (command.length / (256 - HEADER_LENGTH)) + 1;
-        System.out.println("Num of packets " + numOfPackets);
         byte[] message;
-        while (index < command.length){
+        while (index < command.length) {
 
-            if (index + 256 - HEADER_LENGTH > command.length){
+            if (index + 256 - HEADER_LENGTH > command.length) {
                 message = Arrays.copyOfRange(command, index, command.length);
-                System.out.println("Here");
             } else {
                 message = Arrays.copyOfRange(command, index, index + 256 - HEADER_LENGTH);
             }
@@ -100,7 +99,6 @@ public abstract class Node {
         if (commandPackets.isEmpty()) {
             currentFrameGroup = 0;
         }
-        terminal.println(Integer.toString(data[FRAME_POS]));
         if (currentFrameGroup == 0) {
             if (data[FRAME_POS] == FRAME_1 && frameSlot1 == null) {
                 frameSlot1 = data;
@@ -140,6 +138,10 @@ public abstract class Node {
             commandPackets.add(frameSlot1);
             frameSlot1 = null;
         }
+
+        if (data[PACKET_NUMBER_POSITION] == commandPackets.size()) {
+            currentFrameGroup = 0;
+        }
     }
 
     public byte[] putCommandPacketsTogether(ArrayList<byte[]> commandPackets) {
@@ -155,7 +157,6 @@ public abstract class Node {
     }
 
     public void dealWithAckFrame(byte[] data, Terminal terminal) {
-        terminal.println(Integer.toString(data[FRAME_POS]));
         if (currentFrameGroup == 0) {
             if (data[FRAME_POS] == FRAME_1) {
                 frameGroupPart1Recieved = true;
@@ -164,7 +165,7 @@ public abstract class Node {
             } else {
                 terminal.println("Wrong packet recieved");
             }
-            if (frameGroupPart1Recieved && frameGroupPart2Recieved){
+            if (frameGroupPart1Recieved && frameGroupPart2Recieved) {
                 currentFrameGroup = 1;
             }
         } else {
@@ -175,7 +176,7 @@ public abstract class Node {
             } else {
                 terminal.println("Wrong packet recieved");
             }
-            if (frameGroupPart1Recieved && frameGroupPart2Recieved){
+            if (frameGroupPart1Recieved && frameGroupPart2Recieved) {
                 currentFrameGroup = 0;
             }
         }
@@ -199,6 +200,7 @@ public abstract class Node {
         public void run() {
             try {
                 latch.await();
+
 
                 while (true) {
                     DatagramPacket packet = new DatagramPacket(new byte[PACKET_SIZE], PACKET_SIZE);

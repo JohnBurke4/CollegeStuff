@@ -1,11 +1,8 @@
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
 
 public class CandC extends Node {
 
@@ -14,8 +11,10 @@ public class CandC extends Node {
 
 
     private boolean connected = false;
+    private boolean commandRecieved = false;
 
     private ArrayList<DatagramPacket> commandPackets = new ArrayList<DatagramPacket>();
+    private ArrayList<byte[]> incomingPackets = new ArrayList<byte[]>();
 
     InetSocketAddress brokerAddress;
     Terminal terminal;
@@ -31,95 +30,35 @@ public class CandC extends Node {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
-
-//    public void splitPacketIntoSmallerPackets(byte[] command){
-//        int index = 0;
-//        int frameIndex = 0;
-//        int numOfPackets = (command.length / (256 - HEADER_LENGTH)) + 1;
-//        System.out.println("Num of packets " + numOfPackets);
-//        byte[] message;
-//        while (index < command.length){
-//
-//            if (index + 256 - HEADER_LENGTH > command.length){
-//                message = Arrays.copyOfRange(command, index, command.length);
-//                System.out.println("Here");
-//            } else {
-//                message = Arrays.copyOfRange(command, index, index + 256 - HEADER_LENGTH);
-//            }
-//            index += (256 - HEADER_LENGTH);
-//            commandPackets.add(makePacket(brokerAddress, message, TYPE_DATA, (byte) (frameIndex % 4), C_AND_C_TYPE, (byte) numOfPackets));
-//            frameIndex++;
-//        }
-//    }
-
-//    private void putCommandPacketsTogether() {
-//        byte[] command = new byte[commandPackets.size() * (256)];
-//        int index = 0;
-//        for (DatagramPacket part: commandPackets){
-//            byte[] data = part.getData();
-//            int size = (data[LENGTH_POS] < 0)?data[LENGTH_POS] + 256:data[LENGTH_POS];
-//            System.arraycopy(data, HEADER_LENGTH, command, index, size);
-//            index += 256 - HEADER_LENGTH;
-//        }
-//        BrokerCommand stuff = BrokerCommand.makeFromSerialized(command);
-//        terminal.println(stuff.getCommand());
-//
-//
-//    }
 
     @Override
     public synchronized void sendMessage() throws Exception {
         byte[] command = BrokerCommand.getSerialized(createCommand());
         splitPacketIntoSmallerPackets(command, commandPackets, brokerAddress, C_AND_C_TYPE);
-        terminal.println(Integer.toString(commandPackets.size()));
-        for (int i = 0; i < commandPackets.size(); i++){
-            //terminal.println("Sending");
+        for (int i = 0; i < commandPackets.size(); i++) {
             socket.send(commandPackets.get(i));
             this.wait(2);
-            if (i % 2 == 1){
-                while (!frameGroupPart1Recieved || !frameGroupPart2Recieved){
-                    terminal.println(Boolean.toString(frameGroupPart1Recieved));
-                    terminal.println(Boolean.toString(frameGroupPart2Recieved));
+            if (i % 2 == 1) {
+                while (!frameGroupPart1Recieved || !frameGroupPart2Recieved) {
                     terminal.println("Sending packets again");
-                    wait(2);
+                    wait(4);
                     socket.send(commandPackets.get(i));
-                    socket.send(commandPackets.get(i-1));
+                    socket.send(commandPackets.get(i - 1));
                 }
                 frameGroupPart1Recieved = false;
                 frameGroupPart2Recieved = false;
             }
 
         }
+        resetFraming();
         terminal.println("Sent command");
     }
 
-//    public void dealWithAckFrame(byte[] data) {
-//        if (currentFrameGroup == 0) {
-//            if (data[FRAME_POS] == FRAME_1) {
-//                frameGroupPart1Recieved = true;
-//            } else if (data[FRAME_POS] == FRAME_2) {
-//                frameGroupPart2Recieved = true;
-//            } else {
-//                terminal.println("Wrong packet recieved");
-//            }
-//            if (frameGroupPart1Recieved && frameGroupPart2Recieved){
-//                currentFrameGroup = 1;
-//            }
-//        } else {
-//            if (data[FRAME_POS] == FRAME_3) {
-//                frameGroupPart1Recieved = true;
-//            } else if (data[FRAME_POS] == FRAME_4) {
-//                frameGroupPart2Recieved = true;
-//            } else {
-//                terminal.println("Wrong packet recieved");
-//            }
-//            if (frameGroupPart1Recieved && frameGroupPart2Recieved){
-//                currentFrameGroup = 0;
-//            }
-//        }
-//    }
+    public void resetFraming() {
+        commandPackets.clear();
+        currentFrameGroup = 0;
+    }
 
     public BrokerCommand createCommand() {
         terminal.println("Please issue the command you wish to send: ");
@@ -147,20 +86,23 @@ public class CandC extends Node {
                     System.arraycopy(data, HEADER_LENGTH, byteContent, 0, data.length - HEADER_LENGTH);
                     switch (data[NODE_POS]) {
                         case BROKER_TYPE:
-                            BrokerCommand command = BrokerCommand.makeFromSerialized(byteContent);
-                            if (command.getComplete()) {
-                                terminal.println("The command to | " + command.getCommand() + " | is complete");
-                                sendMessage();
-                            } else {
-                                terminal.println("Something went wrong in trying to complete your command");
+                            // simulates packetloss
+                            if (Math.random() > PACKET_LOSS_PERCENT) {
+                                commandPacketFraming(data, packet.getSocketAddress(), incomingPackets, terminal);
                             }
+                            if (incomingPackets.size() == data[PACKET_NUMBER_POSITION]) {
+                                terminal.println("All packets recieved");
+                                commandRecieved = true;
+                            }
+
                             break;
+                        default:
+                            terminal.println("Error in Node who sent message, wrong node type;");
                     }
-                    sendAck(packet.getSocketAddress(), data[FRAME_POS]);
                     break;
+
+
                 case TYPE_ACK:
-                    //terminal.println("Ack recieved");
-                    //terminal.println("Frame: " + data[FRAME_POS]);
                     dealWithAckFrame(data, terminal);
                     break;
                 case TYPE_CONNECTION_ACK:
@@ -176,9 +118,21 @@ public class CandC extends Node {
     }
 
     @Override
-    public void run() {
+    public synchronized void run() {
         while (true) {
             try {
+                wait(100);
+                if (commandRecieved) {
+                    BrokerCommand command = BrokerCommand.makeFromSerialized(putCommandPacketsTogether(incomingPackets));
+                    incomingPackets.clear();
+                    if (command.getComplete()) {
+                        terminal.println("The command to | " + command.getCommand() + " | is complete");
+                        sendMessage();
+                    } else {
+                        terminal.println("Something went wrong in trying to complete your command");
+                    }
+                    commandRecieved = false;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
