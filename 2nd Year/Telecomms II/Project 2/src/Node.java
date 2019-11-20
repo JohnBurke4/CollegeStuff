@@ -11,8 +11,9 @@ public abstract class Node {
 
     public final byte TYPE_DATA = 0;
     public final byte TYPE_ACK = 1;
-    public final byte TYPE_CONNECTION = 2;
-    public final byte TYPE_CONNECTION_ACK = 3;
+    public final byte TYPE_HELLO = 2;
+    public final byte TYPE_FEATURE_REQUEST = 3;
+    public final byte TYPE_FEATURE_RESPONSE = 4;
     public final int TYPE_POS = 0;
 
     public final int LENGTH_POS = 1;
@@ -30,13 +31,14 @@ public abstract class Node {
     }
 
     public DatagramPacket makePacket(SocketAddress address, byte[] message, byte type) {
-        if (type == TYPE_DATA) {
+        if (type == TYPE_DATA || type == TYPE_FEATURE_REQUEST || type == TYPE_FEATURE_RESPONSE) {
             byte[] data = new byte[HEADER_LENGTH + message.length];
             data[TYPE_POS] = type;
             data[LENGTH_POS] = (byte) message.length;
             System.arraycopy(message, 0, data, HEADER_LENGTH, message.length);
             DatagramPacket packet = new DatagramPacket(data, data.length);
-            packet.setSocketAddress(address);
+            System.out.println(address);
+            packet.setSocketAddress((SocketAddress) address);
             return packet;
         } else {
             byte[] header = new byte[HEADER_LENGTH];
@@ -48,7 +50,7 @@ public abstract class Node {
         }
     }
 
-    public abstract void sendMessage(SocketAddress address, String message) throws Exception;
+    public abstract void sendMessage(SocketAddress address, String message, byte type) throws Exception;
 
     public abstract void sendAck(SocketAddress returnAddress) throws Exception;
 
