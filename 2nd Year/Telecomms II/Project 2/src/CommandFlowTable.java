@@ -80,7 +80,7 @@ public class CommandFlowTable {
         @Override
         public String toString(){
             String result = "";
-            result += "Destingation: " + dest + " Source: " + src + "\n";
+            result += "Destination: " + dest + " Source: " + src + "\n";
 
             for (Flow flow: flows){
                 result += flow.toString() + "\n";
@@ -106,10 +106,6 @@ public class CommandFlowTable {
             this.in = in;
         }
 
-        public int getOut(){
-            return out;
-        }
-
         public boolean compareRouter(int router){
             return this.router==router;
         }
@@ -122,8 +118,6 @@ public class CommandFlowTable {
         public String toString(){
             return "In: " + in + " Router: " + router + " Out: " + out;
         }
-
-
 
     }
 }

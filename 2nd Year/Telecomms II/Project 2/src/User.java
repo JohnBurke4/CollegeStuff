@@ -2,6 +2,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,13 +13,16 @@ public class User extends Node {
     Terminal terminal;
     RouterFlowTable flowTable;
     InetSocketAddress nearestRouter;
-    Integer destination;
     boolean sendMessage;
     boolean canSendMessage = false;
+    int address;
+
+    static HashMap<String, Integer> Users = new HashMap<>();
 
     public User(int address, Terminal terminal, boolean sendMessage) {
         try {
             this.terminal = terminal;
+            this.address = address;
             this.socket = new DatagramSocket(address);
             this.listener.go();
             controlAddress = new InetSocketAddress("localhost", CONTROL_ADDRESS);
@@ -33,10 +37,6 @@ public class User extends Node {
 
     public void setNearestRouter(int port) {
         nearestRouter = new InetSocketAddress("localhost", port);
-    }
-
-    public void setDestination(int port) {
-        destination = port;
     }
 
     @Override
@@ -58,9 +58,10 @@ public class User extends Node {
     public synchronized void onReceipt(DatagramPacket packet)  {
         byte[] data = packet.getData();
         switch (data[TYPE_POS]) {
-            case TYPE_HELLO:
+            case TYPE_FEATURE_RESPONSE:
                 terminal.println("Connected to Control");
                 connected = true;
+                setNearestRouter(getConnectedRouter(data));
                 try {
                     wait(1000);
                 }
@@ -69,7 +70,6 @@ public class User extends Node {
                 }
                 if (sendMessage){
                     canSendMessage = true;
-                    //sendMessageToUser();
                 }
 
                 break;
@@ -83,11 +83,17 @@ public class User extends Node {
         }
     }
 
+    public int getConnectedRouter(byte[] data){
+        byte[] message = new byte[data[LENGTH_POS]];
+        System.arraycopy(data, HEADER_LENGTH, message, 0, data[LENGTH_POS]);
+        String messageString = new String(message);
+        return Integer.parseInt(messageString);
+    }
+
     public void printMessage(byte[] data){
         byte[] message = new byte[data[LENGTH_POS]];
         System.arraycopy(data, HEADER_LENGTH, message, 0, data[LENGTH_POS]);
         String messageString = new String(message);
-        System.out.println(messageString);
         String[] split = messageString.split("\\|");
         terminal.println(split[0]);
     }
@@ -95,8 +101,24 @@ public class User extends Node {
     public void sendMessageToUser() {
         terminal.println("Please input your message:");
         String message = terminal.read(" M: ");
-        sendMessage(nearestRouter, message + "|" + destination , TYPE_DATA);
-        System.out.println("Sent message");
+        boolean validDestination = false;
+        String destinationName = "";
+        while (!validDestination){
+            terminal.println("Available Users");
+            for (String user: Users.keySet()){
+                if (!user.equals(terminal.name)){
+                    terminal.println(user);
+                }
+            }
+            terminal.println("Please input destination name: ");
+            destinationName = terminal.read(" D: ");
+            if (Users.containsKey(destinationName)){
+                validDestination = true;
+            } else{
+                terminal.println("Invalid User, please try again");
+            }
+        }
+        sendMessage(nearestRouter, message + "|" + Users.get(destinationName) , TYPE_DATA);
     }
 
     @Override
@@ -117,16 +139,17 @@ public class User extends Node {
 
     @Override
     public synchronized void connectToControl() throws Exception {
-        socket.send(makePacket(controlAddress, null, TYPE_HELLO));
+        socket.send(makePacket(controlAddress, null, TYPE_USER_HELLO));
+        Users.put(terminal.name, address);
         wait(100);
         while (!connected) {
             terminal.println("No connection, trying again...");
-            socket.send(makePacket(controlAddress, null, TYPE_HELLO));
+            socket.send(makePacket(controlAddress, null, TYPE_USER_HELLO));
             wait(3000);
         }
     }
 
-    public static void main(String[] args) {
+    public synchronized static void main(String[] args) {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         executorService.submit(User::createAndRunUser1);
@@ -135,18 +158,14 @@ public class User extends Node {
     }
 
     public static void createAndRunUser1() {
-        Terminal terminal = new Terminal("User 1");
-        User user = new User(40010, terminal, true);
-        user.setNearestRouter(40012);
-        user.setDestination(40011);
+        Terminal terminal = new Terminal("User1");
+        User user = new User(40001, terminal, true);
         user.run();
     }
 
     public static void createAndRunUser2() {
-        Terminal terminal = new Terminal("User 2");
-        User user = new User(40011, terminal, false);
-        user.setNearestRouter(40015);
-        user.setDestination(40010);
+        Terminal terminal = new Terminal("User2");
+        User user = new User(40002, terminal, false);
         user.run();
     }
 }

@@ -13,8 +13,6 @@ public class Router extends Node {
     RouterFlowTable flowTable;
     DatagramPacket currentData = null;
 
-
-
     public Router(int address, Terminal terminal) {
         try {
             this.terminal = terminal;
@@ -69,7 +67,6 @@ public class Router extends Node {
         byte[] message = new byte[data[LENGTH_POS]];
         System.arraycopy(data, HEADER_LENGTH, message, 0, data[LENGTH_POS]);
         String messageString = new String(message);
-        System.out.println(messageString);
         String[] split = messageString.split("\\|");
         while (flowTable.getNextHop(Integer.parseInt(split[1])) == -1) {
             try {
@@ -80,13 +77,14 @@ public class Router extends Node {
                 e.printStackTrace();
             }
         }
+        terminal.println("Sending to port: " + flowTable.getNextHop(Integer.parseInt(split[1])));
         InetSocketAddress nextHop = new InetSocketAddress("localhost", flowTable.getNextHop(Integer.parseInt(split[1])));
         sendMessage(nextHop, messageString, TYPE_DATA);
 
     }
 
     public void sendFeatureRequest(String dest, int src) throws Exception {
-        sendMessage(controlAddress, dest+"|"+src, TYPE_FEATURE_REQUEST);
+        sendMessage(controlAddress, dest + "|" + src, TYPE_FEATURE_REQUEST);
     }
 
     public void addRouteFromMessage(byte[] data) {
