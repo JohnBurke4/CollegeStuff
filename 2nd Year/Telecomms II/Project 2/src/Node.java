@@ -7,17 +7,18 @@ import java.util.concurrent.CountDownLatch;
 
 public abstract class Node {
     static final int CONTROL_ADDRESS = 40000;
-    static final int PACKET_SIZE = 1024;
+    private static final int PACKET_SIZE = 1024;
 
-    public final byte TYPE_DATA = 0;
-    public final byte TYPE_ACK = 1;
-    public final byte TYPE_HELLO = 2;
-    public final byte TYPE_FEATURE_REQUEST = 3;
-    public final byte TYPE_FEATURE_RESPONSE = 4;
-    public final int TYPE_POS = 0;
+    final byte TYPE_DATA = 0;
+    final byte TYPE_ACK = 1;
+    final byte TYPE_HELLO = 2;
+    final byte TYPE_FEATURE_REQUEST = 3;
+    final byte TYPE_FEATURE_RESPONSE = 4;
+    final byte TYPE_USER_HELLO = 5;
+    final int TYPE_POS = 0;
 
-    public final int LENGTH_POS = 1;
-    public final int HEADER_LENGTH = 2;
+    final int LENGTH_POS = 1;
+    final int HEADER_LENGTH = 2;
 
     DatagramSocket socket;
     Listener listener;
@@ -37,8 +38,7 @@ public abstract class Node {
             data[LENGTH_POS] = (byte) message.length;
             System.arraycopy(message, 0, data, HEADER_LENGTH, message.length);
             DatagramPacket packet = new DatagramPacket(data, data.length);
-            System.out.println(address);
-            packet.setSocketAddress((SocketAddress) address);
+            packet.setSocketAddress(address);
             return packet;
         } else {
             byte[] header = new byte[HEADER_LENGTH];

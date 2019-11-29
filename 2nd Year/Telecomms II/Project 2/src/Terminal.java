@@ -105,7 +105,11 @@ public class Terminal {
      *
      * @param name Name of the terminal window.
      */
+
+    String name;
+
     public Terminal(String name) {
+        this.name = name;
         JFrame frame = new JFrame(name);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().add(panel = new TerminalPanel());
