@@ -161,7 +161,7 @@ public class Q3 {
 
     public void printWords(){
         for (Node node = root; node != null; node = node.next){
-            System.out.println(node.getWord().word);
+            System.out.println(getMeanings(node.getWord().word));
         }
     }
 
@@ -180,10 +180,11 @@ public class Q3 {
         dict.addMeaning("Test", testMeaning2);
         dict.addMeaning("Hello", helloMeaning);
 
-        System.out.println(dict.getMeanings("Test"));
-        System.out.println(dict.getMeanings("Hello"));
-        System.out.println(dict.getMeanings("Not"));
+        //System.out.println(dict.getMeanings("Test"));
+        //Sy/stem.out.println(dict.getMeanings("Hello"));
+        //System.out.println(dict.getMeanings("Not"));
         dict.printWords();
     }
+
 
 }

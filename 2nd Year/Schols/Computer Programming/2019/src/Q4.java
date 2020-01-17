@@ -1,67 +1,57 @@
+import java.util.TreeMap;
 
-public class Q4 {
+public class Q4{
+
 
     /**
-     * Amortized worst case running time: O(n)
-     * Explanation: The worst case occurs when s and e are the start and end indexes of str respectively.
-     *              The algorithm checks the index of each character in the string hence O(n).
+     * Asymptotic worst case running time: O(n)
+     * Worst case occurs if the substring str[s..e] is a palindrome as
+     * the function iterates through every character in the substring.
      *
-     * Amortized worst case memory requirement: O(1)
-     * Explanation: The algorithm only saves a single character at a time to memory and replaces it afterwards.
+     * Asymptotic worst case memory requirement: O(1)
+     * This is cause the program only checks and holds in memory 2 extra charaters at
+     * a time.
      */
     public static boolean isPalindrome(String str, int s, int e){
-        int lo = s;
-        int hi = e;
-        while (lo < hi){
-            if (str.charAt(lo) != str.charAt(hi)){
+        while (e >= s){
+            if (str.charAt(s++) != str.charAt(e--)) {
                 return false;
             }
-            lo++;
-            hi--;
         }
         return true;
     }
 
-    public static int longestIterativePalindrome(String str){
-        int longest = 0;
-        for (int i = 0; i < str.length(); i++){
-            for(int j = i; j < str.length(); j++){
-                if (j - i > longest){
-                    if (isPalindrome(str, i, j)){
-                        longest = (j - i) + 1;
-                    }
-                }
-            }
-        }
-        return longest;
+    /**
+     * Asymptotic worst case running time: O(2^n)
+     * Worst case occurs if str is not a palindrome, it checks through every substring.
+     * That way it calls isPalindrome for size N + 2(n-1) + 4(n-2)...2^n-1(1) ~ O(2^n)
+     *
+     * Asymptotic worst case memory requirement: O(n)
+     * The function will keep at most n calls on the stack which is the height of the tree
+     * Created by the 2^n recursive calls;
+     */
+
+    public static int longestPalindrome(String str){
+        return longestPalindrome(str, 0, str.length());
     }
 
-    /**
-     * Amortized worst case running time: O(2^n)
-     * Explanation: String substring method takes O(n) time, this is called 2^n times as the
-     *
-     * Amortized worst case memory requirement: O(1)
-     * Explanation: The algorithm only saves a single character at a time to memory and replaces it afterwards.
-     */
-    public static int longestPalindrome(String str){
-        if (isPalindrome(str, 0, str.length()-1)){
-            return str.length();
+    private static int longestPalindrome(String str, int s, int e){
+        if (isPalindrome(str, s, e)){
+            return e - s;
         }
         else {
-            int longest1 = longestPalindrome(str.substring(0, str.length()-1));
-            int longest2 = longestPalindrome(str.substring(1));
-            return (longest1>longest2?longest1:longest2);
+            int left = longestPalindrome(str, ++s, e);
+            int right = longestPalindrome(str, s, --e);
+            return (left>right?left:right);
         }
-
     }
 
-//    public static int longestPalindromeST(String str){
-//
-//    }
+    
+
+
+
 
     public static void main(String[] args){
-        String test = "redrumsirismurder";
-        //System.out.println(isPalindrome(test, 1, test.length() - 2));
-        System.out.println(longestPalindrome(test));
+
     }
 }
