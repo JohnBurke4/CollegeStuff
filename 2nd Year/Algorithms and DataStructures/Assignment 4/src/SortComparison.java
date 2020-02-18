@@ -37,7 +37,22 @@ class SortComparison {
      * @return array sorted in ascending order
      *
      */
-    
+
+    static double [] selectionSort (double a[]){
+        for(int i = 0; i < a.length-1; i++){
+            int minIndex = i;
+            double min = a[i];
+            for (int j = i+1; j < a.length; j++){
+                if (a[j] < min){
+                    min = a[j];
+                    minIndex = j;
+                }
+            }
+            a[minIndex] = a[i];
+            a[i] = min;
+        }
+        return a;
+    }//end selectionsort
 
 }//end class
 
