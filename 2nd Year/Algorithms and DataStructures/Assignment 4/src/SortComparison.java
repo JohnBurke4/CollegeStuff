@@ -91,5 +91,99 @@ class SortComparison {
         return i;
     }
 
+    /**
+     * Sorts an array of doubles using Merge Sort.
+     * This method is static, thus it can be called as SortComparison.sort(a)
+     * @param a: An unsorted array of doubles.
+     * @return array sorted in ascending order
+     *
+     */
+    /**
+     * Sorts an array of doubles using iterative implementation of Merge Sort.
+     * This method is static, thus it can be called as SortComparison.sort(a)
+     *
+     * @param a: An unsorted array of doubles.
+     * @return after the method returns, the array must be in ascending sorted order.
+     */
+
+    static double[] mergeSortIterative (double a[]) {
+        for (int size = 1; size < a.length; size+=size){
+            for (int i = 0; i < a.length-size; i+=size+size){
+                merge(a, i, i+size-1, Math.min(i+size+size-1, a.length-1));
+            }
+        }
+        return a;
+    }//end mergesortIterative
+
+
+
+    /**
+     * Sorts an array of doubles using recursive implementation of Merge Sort.
+     * This method is static, thus it can be called as SortComparison.sort(a)
+     *
+     * @param a: An unsorted array of doubles.
+     * @return after the method returns, the array must be in ascending sorted order.
+     */
+    static double[] mergeSortRecursive (double a[]) {
+        mergeSortRecursive(a, 0, a.length-1);
+        return a;
+    }//end mergeSortRecursive
+
+
+    private static void mergeSortRecursive(double a[], int low, int high){
+        if (low < high){
+            int mid = (low+high)/2;
+            mergeSortRecursive(a, low, mid);
+            mergeSortRecursive(a, mid+1, high);
+            merge(a, low, mid, high);
+        }
+    }
+
+    private static void merge(double a[], int low, int mid, int high){
+        int n1 = mid - low + 1;
+        int n2 = high - mid;
+        double L[] = new double[n1+1];
+        double R[] = new double[n2+1];
+        for(int i = 0; i < n1; i++){
+            L[i] = a[low + i];
+        }
+
+        for (int j = 0; j < n2; j++){
+            R[j] = a[mid+j+1];
+        }
+
+        L[n1] = Double.POSITIVE_INFINITY;
+        R[n2] = Double.POSITIVE_INFINITY;
+
+        int i = 0;
+        int j = 0;
+
+        for (int k = low; k < high+1; k++){
+            if (L[i] <= R[j]){
+                a[k] = L[i++];
+            }
+            else {
+                a[k] = R[j++];
+            }
+        }
+
+
+    }
+
+
+
+
+
+
+
+    public static void main(String[] args) {
+        double[] toSort = {2.0, 1.0, 3.0, 5.0, 10.0, 3.0, 2.0, 9.0};
+        toSort = mergeSortIterative(toSort);
+        for (double num: toSort){
+            System.out.println(num);
+        }
+        //todo: do experiments as per assignment instructions
+    }
+
 }//end class
 
