@@ -5,7 +5,42 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+
 //-------------------------------------------------------------------------
+
+/**                         Insertion       Selection       QuickSort       Merge Recursive        Merge Iterative
+ *  10 Random               0.0123ms        0.0067ms        0.0132ms        0.0303ms               0.0574ms
+ *  100 Random              0.1314ms        0.1234ms        0.0379ms        0.2539ms               0.1177ms
+ *  1000 Random             6.9917ms        3.9377ms        0.6187ms        0.6963ms               0.2086ms
+ *  1000 Few Unique         4.7169ms        1.0475ms        0.1947ms        0.1961ms               0.1713ms
+ *  1000 Nearly Ordered     0.0303ms        0.2244ms        0.1577ms        0.1508ms               0.1466ms
+ *  1000 Reverse Order      0.4309ms        0.3470ms        0.5240ms        0.1146ms               0.1738ms
+ *  1000 Sorted             0.0028ms        0.3099ms        0.8265ms        0.1899ms               0.2618ms
+ *
+ *  a. The order of input has a great impact on Insertion Sort, Selection Sort and QuickSort. Both types of merge sort make the same number of comparisons
+ *      regardless of inputs. For the other three, the number of comparisons and swaps depends on the order.
+ *
+ *  b. Insertion sort has the biggest difference between best and worst performance. This is as when sorted, only n comparisons are needed giving
+ *      it a running time of O(n). Otherwise every element has to be compared against each other giving a time of O(n^2)
+ *
+ *  c. Worst algorithm for scalability is Insertion Sort and best algorithm is Merge Sort Iterative based on my times.
+ *
+ *  d. Based on the times observed, difference between Merge Recursive and Iterative was only observed for the random
+ *      ordered files. Here the iterative version of the algorithm was slightly faster.
+ *
+ *  e. Fastest:
+ *      10 Random: Selection Sort
+ *      100 Random: Quicksort
+ *      1000 Random: Merge Iterative
+ *      1000 Few Unique: Merge Iterative
+ *      1000 Nearly Ordered: Insertion Sort
+ *      1000 Reverse Order: Merge Recursive
+ *      1000 Sorted: Insertion Sort
+ */
+
 /**
  *  Test class for SortComparison.java
  *
@@ -158,6 +193,7 @@ public class SortComparisonTest
      */
     public static void main(String[] args)
     {
+
         //TODO: implement this method
     }
 
