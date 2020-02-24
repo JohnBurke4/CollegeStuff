@@ -23,7 +23,7 @@ import java.io.FileReader;
  *  a. The order of input has a great impact on Insertion Sort, Selection Sort and QuickSort. Both types of merge sort make the same number of comparisons
  *      regardless of inputs. For the other three, the number of comparisons and swaps depends on the order.
  *
- *  b. Insertion sort has the biggest difference between best and worst performance. This is as when sorted, only n comparisons are needed giving
+ *  b. Insertion sort has the biggest difference between best and worst performance. This is as when sorted, only n comparisons are needed and no items 'bubble' giving
  *      it a running time of O(n). Otherwise every element has to be compared against each other giving a time of O(n^2)
  *
  *  c. Worst algorithm for scalability is Insertion Sort and best algorithm is Merge Sort Iterative based on my times.
@@ -191,10 +191,62 @@ public class SortComparisonTest
      *  Use this main method to create the experiments needed to answer the experimental performance questions of this assignment.
      *
      */
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
+        timeAndPrintAllAlgorithms("numbers10.txt", 10);
+        timeAndPrintAllAlgorithms("numbers100.txt", 100);
+        timeAndPrintAllAlgorithms("numbers1000.txt", 1000);
+        timeAndPrintAllAlgorithms("numbers10Duplicates.txt", 1000);
+        timeAndPrintAllAlgorithms("numbersNearlyOrdered1000.txt", 1000);
+        timeAndPrintAllAlgorithms("numbersReverse1000.txt", 1000);
+        timeAndPrintAllAlgorithms("numbersSorted1000.txt", 1000);
+    }
 
-        //TODO: implement this method
+    public static void timeAndPrintAllAlgorithms(String filename, int filesize){
+        double[] numbers = new double[filesize];
+        int index = 0;
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(new FileReader("src/" + filename));
+            String line = reader.readLine();
+            while (line != null) {
+                numbers[index++] = Double.parseDouble(line);
+                line = reader.readLine();
+            }
+            reader.close();
+        } catch (Exception e) {
+            System.out.println("Line not properly read");
+        }
+
+        double[] testInsertion = numbers.clone();
+        double[] testSelection = numbers.clone();
+        double[] testQuick = numbers.clone();
+        double[] testMergeRecur = numbers.clone();
+        double[] testMergeIter = numbers.clone();
+
+        long startTime = System.nanoTime();
+        SortComparison.insertionSort(testInsertion);
+        long endTime = System.nanoTime();
+        System.out.println("Insertion sort time for " + filename + " is " + ((endTime-startTime)/1000000.0) + "ms");
+
+        startTime = System.nanoTime();
+        SortComparison.selectionSort(testSelection);
+        endTime = System.nanoTime();
+        System.out.println("Selection sort time for " + filename + " is " + ((endTime-startTime)/1000000.0) + "ms");
+
+        startTime = System.nanoTime();
+        SortComparison.quickSort(testQuick);
+        endTime = System.nanoTime();
+        System.out.println("Quick sort time for " + filename + " is " + ((endTime-startTime)/1000000.0) + "ms");
+
+        startTime = System.nanoTime();
+        SortComparison.mergeSortRecursive(testMergeRecur);
+        endTime = System.nanoTime();
+        System.out.println("Merge sort recursive time for " + filename + " is " + ((endTime-startTime)/1000000.0) + "ms");
+
+        startTime = System.nanoTime();
+        SortComparison.mergeSortIterative(testMergeIter);
+        endTime = System.nanoTime();
+        System.out.println("Merge sort iterative time for " + filename + " is " + ((endTime-startTime)/1000000.0) + "ms\n");
     }
 
 }
