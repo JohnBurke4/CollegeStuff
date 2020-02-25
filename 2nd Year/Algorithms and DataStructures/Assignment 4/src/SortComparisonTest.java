@@ -221,31 +221,57 @@ public class SortComparisonTest
         double[] testQuick = numbers.clone();
         double[] testMergeRecur = numbers.clone();
         double[] testMergeIter = numbers.clone();
+		long startTime;
+		long endTime;
+		long totalTime = 0;
+		for(int i = 0; i < 5; i++){
+			startTime = System.nanoTime();
+			SortComparison.insertionSort(testInsertion);
+			endTime = System.nanoTime();
+			totalTime+= endTime-startTime;
+		}
+		totalTime /=5;
+        System.out.println("Insertion sort time for " + filename + " is " + ((totalTime)/1000000.0) + "ms");
 
-        long startTime = System.nanoTime();
-        SortComparison.insertionSort(testInsertion);
-        long endTime = System.nanoTime();
-        System.out.println("Insertion sort time for " + filename + " is " + ((endTime-startTime)/1000000.0) + "ms");
+		totalTime = 0;
+		for(int i = 0; i < 5; i++){
+			startTime = System.nanoTime();
+			SortComparison.selectionSort(testSelection);
+			endTime = System.nanoTime();
+			totalTime+= endTime-startTime;
+		}
+		totalTime /=5;
+        System.out.println("Selection sort time for " + filename + " is " + ((totalTime)/1000000.0) + "ms");
 
-        startTime = System.nanoTime();
-        SortComparison.selectionSort(testSelection);
-        endTime = System.nanoTime();
-        System.out.println("Selection sort time for " + filename + " is " + ((endTime-startTime)/1000000.0) + "ms");
+		totalTime = 0;
+		for(int i = 0; i < 5; i++){
+			startTime = System.nanoTime();
+			SortComparison.quickSort(testQuick);
+			endTime = System.nanoTime();
+			totalTime+= endTime-startTime;
+		}
+		totalTime /=5;
+        System.out.println("Quick sort time for " + filename + " is " + ((totalTime)/1000000.0) + "ms");
 
-        startTime = System.nanoTime();
-        SortComparison.quickSort(testQuick);
-        endTime = System.nanoTime();
-        System.out.println("Quick sort time for " + filename + " is " + ((endTime-startTime)/1000000.0) + "ms");
+		totalTime = 0;
+		for(int i = 0; i < 5; i++){
+			startTime = System.nanoTime();
+			SortComparison.mergeSortRecursive(testMergeRecur);
+			endTime = System.nanoTime();
+			totalTime+= endTime-startTime;
+		}
+		totalTime /=5;
+        System.out.println("Merge sort recursive time for " + filename + " is " + ((totalTime)/1000000.0) + "ms");
 
-        startTime = System.nanoTime();
-        SortComparison.mergeSortRecursive(testMergeRecur);
-        endTime = System.nanoTime();
-        System.out.println("Merge sort recursive time for " + filename + " is " + ((endTime-startTime)/1000000.0) + "ms");
-
-        startTime = System.nanoTime();
-        SortComparison.mergeSortIterative(testMergeIter);
-        endTime = System.nanoTime();
-        System.out.println("Merge sort iterative time for " + filename + " is " + ((endTime-startTime)/1000000.0) + "ms\n");
+		totalTime = 0;
+		for(int i = 0; i < 5; i++){
+			startTime = System.nanoTime();
+			SortComparison.mergeSortIterative(testMergeIter);
+			endTime = System.nanoTime();
+			totalTime+=endTime-startTime;
+		}
+		totalTime /=5;
+        System.out.println("Merge sort iterative time for " + filename + " is " + ((totalTime)/1000000.0) + "ms\n");
     }
 
 }
