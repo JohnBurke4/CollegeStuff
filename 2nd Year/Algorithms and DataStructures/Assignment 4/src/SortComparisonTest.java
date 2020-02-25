@@ -1,12 +1,10 @@
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 
 //-------------------------------------------------------------------------
@@ -20,8 +18,9 @@ import java.io.FileReader;
  *  1000 Reverse Order      0.4309ms        0.3470ms        0.5240ms        0.1146ms               0.1738ms
  *  1000 Sorted             0.0028ms        0.3099ms        0.8265ms        0.1899ms               0.2618ms
  *
- *  a. The order of input has a great impact on Insertion Sort, Selection Sort and QuickSort. Both types of merge sort make the same number of comparisons
- *      regardless of inputs. For the other three, the number of comparisons and swaps depends on the order.
+ *  a. The order of input has a great impact on Insertion Sort, Selection Sort and QuickSort according to my calculations. However in theory Selection Sort should not be effected by the order of input.
+ *      The results gotten may be due to the optimization of the jvm whn running a function multiple times.
+ *      Both types of merge sort make the same number of comparisons regardless of inputs. For the other two, the number of comparisons and swaps depends on the order.
  *
  *  b. Insertion sort has the biggest difference between best and worst performance. This is as when sorted, only n comparisons are needed and no items 'bubble' giving
  *      it a running time of O(n). Otherwise every element has to be compared against each other giving a time of O(n^2)
@@ -195,7 +194,7 @@ public class SortComparisonTest
         timeAndPrintAllAlgorithms("numbers10.txt", 10);
         timeAndPrintAllAlgorithms("numbers100.txt", 100);
         timeAndPrintAllAlgorithms("numbers1000.txt", 1000);
-        timeAndPrintAllAlgorithms("numbers10Duplicates.txt", 1000);
+        timeAndPrintAllAlgorithms("numbers1000Duplicates.txt", 1000);
         timeAndPrintAllAlgorithms("numbersNearlyOrdered1000.txt", 1000);
         timeAndPrintAllAlgorithms("numbersReverse1000.txt", 1000);
         timeAndPrintAllAlgorithms("numbersSorted1000.txt", 1000);
