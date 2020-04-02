@@ -21,35 +21,35 @@ import java.util.Scanner;
 
 public class CompetitionDijkstra {
 
-    private class Bag{
+    private class Bag {
         ArrayList<Edge> bag;
 
-        public Bag(){
+        public Bag() {
             bag = new ArrayList<>();
         }
 
-        public void add(int v2, double w){
+        public void add(int v2, double w) {
             bag.add(new Edge(v2, w));
         }
 
-        public void print(){
-            for(Edge e: bag){
+        public void print() {
+            for (Edge e : bag) {
                 System.out.print(" -> " + e.toString());
             }
             System.out.println();
         }
     }
 
-    private class Edge{
+    private class Edge {
         int v2;
         double w;
 
-        public Edge(int v2, double w){
+        public Edge(int v2, double w) {
             this.v2 = v2;
             this.w = w;
         }
 
-        public String toString(){
+        public String toString() {
             return v2 + " " + w;
         }
     }
@@ -58,23 +58,95 @@ public class CompetitionDijkstra {
     private int V;
     private int E;
     private Bag[] adj;
+    private double[] distance;
     private boolean[] visited;
+
+    private int speedA;
+    private int speedB;
+    private int speedC;
+
+    private double longestTime;
+
     /**
      * @param filename: A filename containing the details of the city road network
-     * @param sA, sB, sC: speeds for 3 contestants
+     * @param sA,       sB, sC: speeds for 3 contestants
      */
-    CompetitionDijkstra (String filename, int sA, int sB, int sC){
+    CompetitionDijkstra(String filename, int sA, int sB, int sC) {
+        fillGraph(filename);
+
+        speedA = sA;
+        speedB = sB;
+        speedC = sC;
+
+        distance = new double[V];
+
+        for (int i = 0; i < V; i++) {
+            System.out.print(i + ": ");
+            adj[i].print();
+        }
+
+        longestTime = 0;
+
+        for (int v = 0; v < V; v++) {
+            double temp = DijkstraLongest(v);
+            longestTime = Math.max(temp, longestTime);
+        }
+        //TODO
+    }
+
+    private double DijkstraLongest(int v) {
+        for (int i = 0; i < V; i++) {
+            visited[i] = false;
+            distance[i] = Double.POSITIVE_INFINITY;
+        }
+
+        distance[v] = 0.0;
+
+        int current = v;
+        double smallDist = 0;
+
+        while (current != -1) {
+            for (Edge e : adj[current].bag) {
+                if (!visited[e.v2]) {
+                    distance[e.v2] = Math.min(distance[current] + e.w, distance[e.v2]);
+                }
+            }
+            visited[current] = true;
+
+            smallDist = Double.POSITIVE_INFINITY;
+            current = -1;
+            for (int i = 0; i < V; i++) {
+                if (!visited[i]) {
+                    if (smallDist > distance[i]) {
+                        smallDist = distance[i];
+                        current = i;
+                    }
+                }
+            }
+        }
+
+        double maxDistance = -1;
+        for(int i = 0; i < V; i++){
+            maxDistance = Math.max(distance[i], maxDistance);
+        }
+
+        return maxDistance;
+
+
+    }
+
+    public void fillGraph(String filename) {
         try {
             File myObj = new File(filename);
             Scanner myReader = new Scanner(myObj);
             V = Integer.parseInt(myReader.nextLine());
             E = Integer.parseInt(myReader.nextLine());
             adj = new Bag[V];
-            for (int i = 0; i < V; i++){
+            for (int i = 0; i < V; i++) {
                 adj[i] = new Bag();
             }
             visited = new boolean[V];
-            for(int i = 0; i < E; i++){
+            for (int i = 0; i < E; i++) {
                 String[] line = myReader.nextLine().split(" ");
                 int v1 = Integer.parseInt(line[0]);
                 int v2 = Integer.parseInt(line[1]);
@@ -86,26 +158,20 @@ public class CompetitionDijkstra {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
-
-        for (int i = 0; i < V; i++){
-            System.out.print(i + ": ");
-            adj[i].print();
-        }
-        //TODO
     }
 
 
     /**
      * @return int: minimum minutes that will pass before the three contestants can meet
      */
-    public int timeRequiredforCompetition(){
-
-        //TO DO
-        return -1;
+    public int timeRequiredforCompetition() {
+        int time = (int) Math.round((longestTime*1000.0/60.0)/Math.min(Math.min(speedA, speedB), speedC));
+        return time;
     }
 
-    public static void main(String[] args){
-        new CompetitionDijkstra("tinyEWD.txt", 1, 2, 3);
+    public static void main(String[] args) {
+        CompetitionDijkstra cD = new CompetitionDijkstra("tinyEWD.txt", 1, 2, 3);
+        System.out.println(cD.timeRequiredforCompetition());
     }
 
 }
