@@ -72,6 +72,10 @@ public class CompetitionDijkstra {
      * @param sA,       sB, sC: speeds for 3 contestants
      */
     CompetitionDijkstra(String filename, int sA, int sB, int sC) {
+        longestTime = Double.POSITIVE_INFINITY;
+        if (filename == null){
+            return;
+        }
         fillGraph(filename);
 
         speedA = sA;
@@ -79,11 +83,6 @@ public class CompetitionDijkstra {
         speedC = sC;
 
         distance = new double[V];
-
-        for (int i = 0; i < V; i++) {
-            System.out.print(i + ": ");
-            adj[i].print();
-        }
 
         longestTime = 0;
 
@@ -165,13 +164,13 @@ public class CompetitionDijkstra {
      * @return int: minimum minutes that will pass before the three contestants can meet
      */
     public int timeRequiredforCompetition() {
-        int time = (int) Math.round((longestTime*1000.0/60.0)/Math.min(Math.min(speedA, speedB), speedC));
+        if (longestTime == Double.POSITIVE_INFINITY)
+            return -1;
+        int time = (int) Math.ceil((longestTime*1000.0)/Math.min(Math.min(speedA, speedB), speedC));
         return time;
     }
 
-    public static void main(String[] args) {
-        CompetitionDijkstra cD = new CompetitionDijkstra("tinyEWD.txt", 1, 2, 3);
-        System.out.println(cD.timeRequiredforCompetition());
+    public static void main(String[] args){
+        System.out.println(new CompetitionDijkstra("tinyEWD.txt", 50, 70, 80).timeRequiredforCompetition());
     }
-
 }
