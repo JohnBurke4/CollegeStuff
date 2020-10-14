@@ -34,6 +34,58 @@ class BT(input: Int) {
             }
         }
     }
+
+    fun prettyPrintValues(): String{
+        return prettyPrint(root, "")
+    }
+
+    fun prettyPrint(node : Node?, prefix : String): String{
+        if (node == null){
+            return prefix + "-null\n"
+        }
+        else {
+            return prefix + "-" + node.value + "\n" + prettyPrint(node.left, prefix + " |") + prettyPrint(node.right, prefix + "  ")
+        }
+    }
+
+    fun LCA(valueA: Int, valueB: Int): Int{
+        var ancestorsA = ancestors(valueA, root, mutableListOf<Int>())
+        var ancestorsB = ancestors(valueB, root, mutableListOf<Int>())
+        for (ancestorA in ancestorsA){
+            for (ancestorB in ancestorsB){
+                if (ancestorA == ancestorB){
+                    return ancestorA
+                }
+            }
+        }
+        return -1
+    }
+
+    fun ancestors(value: Int, node: Node?, array: MutableList<Int>): MutableList<Int>{
+        var duplicate = array;
+        if (node == null){
+            return duplicate
+        }
+        else if (node.value == value){
+            duplicate.add(value)
+            return duplicate
+        }
+        else if(duplicate.isEmpty()){
+            duplicate = ancestors(value, node.left, duplicate)
+            if (duplicate.isEmpty()){
+                duplicate = ancestors(value, node.right, duplicate)
+            }
+            if (!duplicate.isEmpty()){
+                duplicate.add(node.value)
+            }
+            return duplicate
+        }
+        else {
+            return duplicate
+        }
+    }
+
+
 }
 
 
@@ -52,5 +104,6 @@ fun main(){
     bt.addValue(-5)
     bt.addValue(200)
     bt.addValue(5)
-    println(bt.root)
+    println(bt.prettyPrintValues())
+    println(bt.LCA(-5, 12))
 }
