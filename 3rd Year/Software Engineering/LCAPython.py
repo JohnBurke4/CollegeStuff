@@ -1,3 +1,6 @@
+import unittest
+
+
 class Node:
     left = None
     right = None
@@ -74,25 +77,15 @@ class BT:
             return prefix + "-" + str(x.value) + "\n" + self.prettyPrint(x.left, prefix + " |") + self.prettyPrint(x.right, prefix + "  ")
 
 
-root = Node(10)
-bt = BT(root)
-bt.addValue(9)
-bt.addValue(11)
+class TestBTMethods(unittest.TestCase):
 
-bt.addValue(8)
-bt.addValue(10)
-
-
-bt.addValue(9)
-bt.addValue(11)
-bt.addValue(15)
-bt.addValue(12)
-bt.addValue(1)
-bt.addValue(7)
-bt.addValue(-5)
-bt.addValue(200)
-bt.addValue(5)
+    def testCreation(self):
+        root = Node(10)
+        bt = BT(root)
+        self.assertEqual(bt.root.value, 10)
+        self.assertIsNone(bt.root.left)
+        self.assertIsNone(bt.root.right)
 
 
-print(bt.prettyPrintValues())
-print(bt.lCA(-5, 7))
+if __name__ == '__main__':
+    unittest.main()
