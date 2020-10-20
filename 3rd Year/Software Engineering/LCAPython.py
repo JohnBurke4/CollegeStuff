@@ -58,10 +58,8 @@ class BT:
             return array
 
     def lCA(self, valueA, valueB):
-        ancestorsA = self.ancestors(value=valueA, node=root, array=[])
-        ancestorsB = self.ancestors(valueB, root, [])
-        print(ancestorsA)
-        print(ancestorsB)
+        ancestorsA = self.ancestors(value=valueA, node=self.root, array=[])
+        ancestorsB = self.ancestors(valueB, self.root, [])
         for value1 in ancestorsA:
             for value2 in ancestorsB:
                 if (value1 == value2):
@@ -85,6 +83,25 @@ class TestBTMethods(unittest.TestCase):
         self.assertEqual(bt.root.value, 10)
         self.assertIsNone(bt.root.left)
         self.assertIsNone(bt.root.right)
+
+    def testLCA(self):
+        root = Node(10)
+        bt = BT(root)
+        bt.addValue(5)
+        bt.addValue(15)
+        bt.addValue(4)
+        bt.addValue(6)
+        bt.addValue(12)
+        bt.addValue(11)
+        bt.addValue(14)
+        bt.addValue(13)
+
+        self.assertEqual(bt.lCA(5, 15), 10)
+        self.assertEqual(bt.lCA(4, 13), 10)
+        self.assertEqual(bt.lCA(4, 6), 5)
+        self.assertEqual(bt.lCA(5, 4), 5)
+        self.assertEqual(bt.lCA(13, 11), 12)
+        self.assertEqual(bt.lCA(14, 15), 15)
 
 
 if __name__ == '__main__':
