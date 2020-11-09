@@ -2,43 +2,48 @@ import unittest
 
 
 class Node:
-    left = None
-    right = None
+    children = []
     value = None
-    height = None
 
     def __init__(self, value):
         self.value = value
 
 
-class BT:
+class Graph:
     root = None
 
-    def __init__(self, root):
-        self.root = root
-        self.root.height = 1
+    def __init__(self, value):
+        self.root = new Node(value)
 
-    def addValue(self, value):
-        newNode = Node(value)
-        node = self.root
-        while (node != None):
-            if (value == node.value):
-                node.value = value
-                node = None
-            elif (value < node.value):
-                if (node.left == None):
-                    newNode.height = node.height + 1
-                    node.left = newNode
-                    node = None
-                else:
-                    node = node.left
-            else:
-                if (node.right == None):
-                    newNode.height = node.height + 1
-                    node.right = newNode
-                    node = None
-                else:
-                    node = node.right
+    def contains(self, value, node):
+        if (node.value == value):
+            return true
+
+        for child in node.children:
+            if (self.contains(value, child)):
+                return true
+
+        return false
+
+    def get(self, value, node):
+        if (node.value == value):
+            return node
+
+        for child in node.children:
+            newNode = self.get(value, child)
+            if (newNode != None):
+                return newNode
+
+        return None
+
+    def addValue(self, value, parent):
+        if (self.contains(value, self.root)):
+            return
+        else:
+            node = self.get(parent, self.root)
+            if (node != None):
+                newNode = Node(value)
+                node.children.append(newNode)
 
     def ancestors(self, value, node, array):
         if (node == None):
