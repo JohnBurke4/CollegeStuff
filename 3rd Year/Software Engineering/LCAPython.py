@@ -43,7 +43,9 @@ class Graph:
         else:
             node = self.get(parent, self.root)
             if (node != None):
-                newNode = Node(value)
+                newNode = self.get(value, self.root)
+                if (newNode == None):
+                    newNode = Node(value)
                 node.children.append(newNode)
 
     def ancestors(self, value, node, array):
