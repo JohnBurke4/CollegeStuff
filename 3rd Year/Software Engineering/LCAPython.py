@@ -112,6 +112,23 @@ class TestBTMethods(unittest.TestCase):
         self.assertEqual(graph.lCA(7, 4), 1)
         self.assertEqual(graph.lCA(7, 6), 6)
 
+    def testLCADAGs(self):
+        graph = Graph(1)
+        graph.addValue(2, 1)
+        graph.addValue(3, 1)
+        graph.addValue(4, 1)
+
+        graph.addValue(4, 2)
+        graph.addValue(4, 3)
+        graph.addValue(5, 4)
+        graph.addValue(5, 3)
+        graph.addValue(5, 1)
+
+        self.assertEqual(graph.lCA(5, 1), 1)
+        self.assertEqual(graph.lCA(5, 4), 4)
+        self.assertEqual(graph.lCA(2, 5), 1)
+        self.assertEqual(graph.lCA(3, 4), 3)
+
 
 if __name__ == '__main__':
     unittest.main()
