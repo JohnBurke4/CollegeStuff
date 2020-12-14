@@ -39,4 +39,4 @@ while (counter != loops - 1 and r.status_code == 200):
 
 for i in range(0, 24):
     if i in timeDict:
-        print("%s: %s" % (str(i), timeDict[i]))
+        print("Hour: %s Number of commits: %s" % (str(i), timeDict[i]))
