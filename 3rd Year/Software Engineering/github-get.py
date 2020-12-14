@@ -6,8 +6,7 @@ repoOwner = input("Please input the repo owner: ")
 repoName = input("Please input the repo name: ")
 loops = int(input("How many pages do you want to check: "))
 
-f = open("pass.txt", "r")
-authCode = str(f.read())
+authCode = input("Please input your auth token: ")
 
 headers = {"Authorization": "token %s" % authCode}
 requestURL = "https://api.github.com/repos/%s/%s/commits" % (
