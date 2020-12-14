@@ -28,10 +28,14 @@ while (counter != loops - 1 and r.status_code == 200):
         else:
             timeDict[date.hour] = 1
 
-    requestURL = r.links["next"]["url"]
-    r = requests.get(requestURL, headers=headers)
-    resultJSON = json.loads(r.text)
-    counter += 1
+    if "next" in r.links:
+        requestURL = r.links["next"]["url"]
+        r = requests.get(requestURL, headers=headers)
+        resultJSON = json.loads(r.text)
+        counter += 1
+    else:
+        break
+
 
 for i in range(0, 24):
     if i in timeDict:
