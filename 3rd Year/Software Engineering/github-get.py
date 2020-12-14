@@ -15,6 +15,7 @@ requestURL = "https://api.github.com/repos/%s/%s/commits" % (
 r = requests.get(requestURL, headers=headers)
 
 resultJSON = json.loads(r.text)
+print(r.links["next"]["url"])
 timeDict = {}
 for i in resultJSON:
     date = datetime.strptime(
