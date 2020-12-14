@@ -1,4 +1,6 @@
 import requests
+import json
+from datetime import datetime
 
 repoOwner = input("Please input the repo owner: ")
 repoName = input("Please input the repo name: ")
@@ -12,4 +14,14 @@ requestURL = "https://api.github.com/repos/%s/%s/commits" % (
 
 r = requests.get(requestURL, headers=headers)
 
-print(r.text)
+resultJSON = json.loads(r.text)
+timeDict = {}
+for i in resultJSON:
+    date = datetime.strptime(
+        i["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ")
+    if date.hour in timeDict:
+        timeDict[date.hour] += 1
+    else:
+        timeDict[date.hour] = 1
+
+print(timeDict)
