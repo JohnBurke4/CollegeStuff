@@ -5,7 +5,6 @@ from datetime import datetime
 repoOwner = input("Please input the repo owner: ")
 repoName = input("Please input the repo name: ")
 loops = int(input("How many pages do you want to check: "))
-
 authCode = input("Please input your auth token: ")
 
 headers = {"Authorization": "token %s" % authCode}
