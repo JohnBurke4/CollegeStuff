@@ -35,9 +35,7 @@ while (counter != loops and r.status_code == 200):
         break
 
 
-resultFile = open("result.txt", "w")
-resultFile.write("User: %s, Repo: %s\n" % (repoOwner, repoName))
-for i in range(0, 24):
-    if i in timeDict:
-        resultFile.write("Hour: %s Number of commits: %s\n" %
-                         (str(i), timeDict[i]))
+resultFile = open("result.json", "w")
+timeDict["Owner"] = repoOwner
+timeDict["Repo"] = repoName
+resultFile.write(json.dumps(timeDict))
