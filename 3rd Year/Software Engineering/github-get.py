@@ -18,8 +18,8 @@ r = requests.get(requestURL, headers=headers)
 resultJSON = json.loads(r.text)
 timeDict = {}
 counter = 0
-while (counter != loops - 1 and r.status_code == 200):
-    print("Page: %s" % str(counter))
+while (counter != loops and r.status_code == 200):
+    print("Page: %s" % str(counter+1))
     for i in resultJSON:
         date = datetime.strptime(
             i["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ")
@@ -37,6 +37,8 @@ while (counter != loops - 1 and r.status_code == 200):
         break
 
 
+resultFile = open("result.txt", "w")
 for i in range(0, 24):
     if i in timeDict:
-        print("Hour: %s Number of commits: %s" % (str(i), timeDict[i]))
+        resultFile.write("Hour: %s Number of commits: %s\n" %
+                         (str(i), timeDict[i]))
