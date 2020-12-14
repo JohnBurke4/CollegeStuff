@@ -7,7 +7,8 @@ f = open("pass.txt", "r")
 authCode = str(f.read())
 
 headers = {"Authorization": "token %s" % authCode}
-requestURL = "https://api.github.com/repos/%s/%s/commits" % repoOwner, repoName
+requestURL = "https://api.github.com/repos/%s/%s/commits" % (
+    repoOwner, repoName)
 
 r = requests.get(requestURL, headers=headers)
 
