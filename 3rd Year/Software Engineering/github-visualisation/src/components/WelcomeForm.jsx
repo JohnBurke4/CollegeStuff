@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Form from "react-bootstrap/Form"
 import Button from "react-bootstrap/Button"
+import getCommits from "./../api/getCommits"
 
 class WelcomeForm extends Component {
     constructor(props){
@@ -27,6 +28,7 @@ class WelcomeForm extends Component {
     }
 
     handleSubmit(event){
+        getCommits(this.state.repoOwner, this.state.repoName, this.state.authCode);
         const alertData = "AuthCode: " + this.state.authCode + "\nRepo Owner: " + this.state.repoOwner + "\nRepo Name: " + this.state.repoName;
         alert(alertData);
         event.preventDefault();
