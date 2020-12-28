@@ -3,36 +3,58 @@ import {Container} from "react-bootstrap"
 import BarChart from "./BarChart";
 import Introduction from "./Introduction"
 import WelcomeForm from "./WelcomeForm"
+import getCommits from "./../api/getCommits"
 
 class MainBody extends Component {
     constructor(props){
         super(props);
         this.state = {
+            authCode: "",
+            repoOwner: "",
+            repoName: "",
             hasResult: false,
-            barchartData: []
+            barchartData: [],
+            state: 1
         }
         
     }
 
-    updateBarChartData = (data) => {
+    updateRepoData = (auth, owner, name) => {
+        console.log(auth + " " + owner + " " + name);
         this.setState({
-            barchartData: data
-        })
+            authCode: auth,
+            repoOwner: owner,
+            repoName: name
+        });
+        getCommits(owner, name, auth).then((data) => {
+            console.log(data);
+            this.setState({
+                barchartData: data,
+                state: 3
+            });
+        });
+
     }
     render() {
-        let barChart;
-        if (this.state.barchartData === []){
-            barChart = <div></div>;
+        let body;
+        if (this.state.state === 1){
+            body = <WelcomeForm dataFunction={this.updateRepoData}/>
         }
-        else {
+        else if (this.state.state === 2){
+            //body = <DataLoading/>
+        }
+        else if (this.state.state === 3){
+            console.log("changing");
             console.log(this.state.barchartData);
-            barChart = <BarChart data={this.state.barchartData}/>;
+            
         }
         return (
             <Container>
                 <Introduction/>
-                <WelcomeForm dataFunction={this.updateBarChartData} />
-                {barChart}
+                <Container className="justify-content-center">
+                    {body}
+                    <BarChart data={this.state.barchartData}/>
+                </Container>
             </Container>
         );
     }

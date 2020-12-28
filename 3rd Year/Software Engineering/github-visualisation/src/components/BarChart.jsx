@@ -12,6 +12,7 @@ class BarChart extends Component {
 
 
     componentDidUpdate() {
+        console.log("update")
         this.drawChart();
     }
 
@@ -37,7 +38,7 @@ class BarChart extends Component {
     }
 
     render(){
-        return <svg id="Graph"></svg>
+        return <svg id="1"></svg>
     }
 }
 
