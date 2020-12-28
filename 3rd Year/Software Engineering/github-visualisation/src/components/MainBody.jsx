@@ -11,13 +11,28 @@ class MainBody extends Component {
             hasResult: false,
             barchartData: []
         }
+        
+    }
+
+    updateBarChartData = (data) => {
+        this.setState({
+            barchartData: data
+        })
     }
     render() {
+        let barChart;
+        if (this.state.barchartData === []){
+            barChart = <div></div>;
+        }
+        else {
+            console.log(this.state.barchartData);
+            barChart = <BarChart data={this.state.barchartData}/>;
+        }
         return (
             <Container>
                 <Introduction/>
-                <WelcomeForm data={this.state.data}/>
-                <BarChart data={this.state.barchartData}/>
+                <WelcomeForm dataFunction={this.updateBarChartData} />
+                {barChart}
             </Container>
         );
     }

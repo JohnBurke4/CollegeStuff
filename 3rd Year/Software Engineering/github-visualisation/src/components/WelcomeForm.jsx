@@ -28,9 +28,14 @@ class WelcomeForm extends Component {
     }
 
     handleSubmit(event){
-        getCommits(this.state.repoOwner, this.state.repoName, this.state.authCode);
+        getCommits(this.state.repoOwner, this.state.repoName, this.state.authCode).then(data => {
+            //console.log(data);
+            this.props.dataFunction(data);
+        });
         const alertData = "AuthCode: " + this.state.authCode + "\nRepo Owner: " + this.state.repoOwner + "\nRepo Name: " + this.state.repoName;
         alert(alertData);
+        
+        
         event.preventDefault();
     }
     render() {
