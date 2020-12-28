@@ -19,7 +19,7 @@ counter = 0
 while (counter != loops and r.status_code == 200):
     print("Page: %s" % str(counter+1))
     for i in resultJSON:
-        date = datetime.strptime(
+                date = datetime.strptime(
             i["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ")
         if date.hour in timeDict:
             timeDict[date.hour] += 1
