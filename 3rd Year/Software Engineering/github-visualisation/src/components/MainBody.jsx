@@ -53,7 +53,7 @@ class MainBody extends Component {
                 <Introduction/>
                 <Container className="justify-content-center">
                     {body}
-                    <BarChart data={this.state.barchartData}/>
+                    <BarChart data={this.state.barchartData} margin="60" height="600" width="1200"/>
                 </Container>
             </Container>
         );
