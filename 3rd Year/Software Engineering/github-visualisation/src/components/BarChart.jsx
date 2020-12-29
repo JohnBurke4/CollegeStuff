@@ -19,6 +19,7 @@ class BarChart extends Component {
     drawChart() {
 
         let xDomain = Array.from({length: 24}, (_, i) => i + 1);
+        //let data = Array.from({length: 24}, (_, i) => i + 1);
 
         const data = this.props.data;
         console.log(Math.max(...data));
@@ -39,14 +40,23 @@ class BarChart extends Component {
 
         const xScale = d3.scaleBand()
         .range([0, width])
-        .domain(xDomain.map(x => `Hour: ${x.toString()}`))
+        .domain(xDomain.map(x => x))
         .padding(0.2)
 
         chart.append('g')
         .attr('transform', `translate(0, ${height})`)
         .call(d3.axisBottom(xScale));
         
-    }
+        chart.selectAll()
+        .data(data)
+        .enter()
+        .append('rect')
+        
+        .attr('x', (actual, index, array) => xScale(1+index))
+        .attr('y', (s) => yScale(s))
+        .attr('height', (s) => height - yScale(s))
+        .attr('width', xScale.bandwidth())
+        }
 
     render(){
         return <svg id="1" height={this.props.height} width={this.props.width}></svg>
