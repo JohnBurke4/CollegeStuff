@@ -61,6 +61,25 @@ class BarChart extends Component {
         .attr('y', (s) => yScale(s))
         .attr('height', (s) => height - yScale(s))
         .attr('width', xScale.bandwidth())
+        //.attr('fill', 'green')
+
+        // Adding in the axis labels
+        chart.append("text")
+        .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + 40) + ")")
+        .style("text-anchor", "middle")
+        .text("Hour of the Day");
+
+        chart.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin)
+        .attr("x",0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Number of Commits"); 
+
+
         }
 
     render(){
