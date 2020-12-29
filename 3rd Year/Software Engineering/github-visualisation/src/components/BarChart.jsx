@@ -16,6 +16,11 @@ class BarChart extends Component {
         this.drawChart();
     }
 
+    componentDidMount() {
+        console.log("mount")
+        this.drawChart();
+    }
+
     drawChart() {
 
         let xDomain = Array.from({length: 24}, (_, i) => i + 1);
@@ -59,7 +64,9 @@ class BarChart extends Component {
         }
 
     render(){
-        return <svg id="1" height={this.props.height} width={this.props.width}></svg>
+        return <div className="text-center">
+            <svg height={this.props.height} /*className="bg-primary"*/ width={this.props.width} ></svg>
+            </div>
     }
 }
 

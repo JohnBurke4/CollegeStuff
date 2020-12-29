@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {Container} from "react-bootstrap"
+import {Container, Spinner} from "react-bootstrap"
 import BarChart from "./BarChart";
 import Introduction from "./Introduction"
 import WelcomeForm from "./WelcomeForm"
@@ -24,7 +24,8 @@ class MainBody extends Component {
         this.setState({
             authCode: auth,
             repoOwner: owner,
-            repoName: name
+            repoName: name,
+            state: 2
         });
         getCommits(owner, name, auth).then((data) => {
             console.log(data);
@@ -41,11 +42,12 @@ class MainBody extends Component {
             body = <WelcomeForm dataFunction={this.updateRepoData}/>
         }
         else if (this.state.state === 2){
-            //body = <DataLoading/>
+            body =  <div className="d-flex justify-content-center">
+                        <Spinner animation="border" variant="primary" />
+                    </div>
         }
         else if (this.state.state === 3){
-            console.log("changing");
-            console.log(this.state.barchartData);
+            body = <BarChart data={this.state.barchartData} margin="50" height="600" width="1000"/>
             
         }
         return (
@@ -53,7 +55,7 @@ class MainBody extends Component {
                 <Introduction/>
                 <Container className="justify-content-center">
                     {body}
-                    <BarChart data={this.state.barchartData} margin="60" height="600" width="1200"/>
+                    
                 </Container>
             </Container>
         );
