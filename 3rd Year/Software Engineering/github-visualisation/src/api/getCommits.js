@@ -7,7 +7,7 @@ async function getCommits(repoOwner, repoName, authToken){
     let currentPage = 1;
     let result = new Array(24).fill(0);
     let length = 1;
-    while (currentPage < maxPages && length !== 0){
+    while (currentPage <= maxPages && length !== 0){
         let url = `https://api.github.com/repos/${repoOwner}/${repoName}/commits?per_page=100&page=${currentPage}`
         var data = await fetch(url, 
             {
