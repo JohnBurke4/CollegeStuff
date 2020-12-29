@@ -23,7 +23,7 @@ class BarChart extends Component {
 
     drawChart() {
 
-        let xDomain = Array.from({length: 24}, (_, i) => i + 1);
+        let xDomain = Array.from(Array(24).keys());
         //let data = Array.from({length: 24}, (_, i) => i + 1);
 
         const data = this.props.data;
@@ -57,7 +57,7 @@ class BarChart extends Component {
         .enter()
         .append('rect')
         
-        .attr('x', (actual, index, array) => xScale(1+index))
+        .attr('x', (actual, index, array) => xScale(index))
         .attr('y', (s) => yScale(s))
         .attr('height', (s) => height - yScale(s))
         .attr('width', xScale.bandwidth())
