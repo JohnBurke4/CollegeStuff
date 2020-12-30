@@ -23,14 +23,14 @@ class BarChart extends Component {
 
     drawChart() {
 
-        let xDomain = Array.from(Array(24).keys());
+        let xDomain = Array.from(Array(this.props.data.length).keys());
         //let data = Array.from({length: 24}, (_, i) => i + 1);
 
         const data = this.props.data;
         console.log(Math.max(...data));
         const margin = this.props.margin;
-        const width = this.props.width - 2 * margin;
-        const height = this.props.height - 2 * margin;
+        const width = this.props.width - 4 * margin;
+        const height = this.props.height - 4 * margin;
         const svg = d3.select("svg");
 
         const chart = svg.append('g')
@@ -84,6 +84,7 @@ class BarChart extends Component {
 
     render(){
         return <div className="text-center">
+            <h3>Commits per time of day</h3>
             <svg height={this.props.height} /*className="bg-primary"*/ width={this.props.width} ></svg>
             </div>
     }

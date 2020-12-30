@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import {Container, Spinner} from "react-bootstrap"
 import BarChart from "./BarChart";
+import LolipopChart from "./LolipopChart"
 import Introduction from "./Introduction"
 import WelcomeForm from "./WelcomeForm"
 import getCommits from "./../api/getCommits"
@@ -14,6 +15,7 @@ class MainBody extends Component {
             repoName: "",
             hasResult: false,
             barchartData: [],
+            authorData: [],
             state: 1
         }
         
@@ -30,7 +32,8 @@ class MainBody extends Component {
         getCommits(owner, name, auth).then((data) => {
             console.log(data);
             this.setState({
-                barchartData: data,
+                barchartData: data.hours,
+                authorData: data.authors,
                 state: 3
             });
         });
@@ -52,6 +55,7 @@ class MainBody extends Component {
                 <a href={`https://github.com/${this.state.repoOwner}/${this.state.repoName}`}><h3>{`https://github.com/${this.state.repoOwner}/${this.state.repoName}`}</h3></a>
                 <h4>Commits analysed: {this.state.barchartData.reduce((a,b) => a+b)}</h4>
                 <BarChart data={this.state.barchartData} margin="50" height="600" width="1000"/>
+                <LolipopChart data={this.state.authorData} margin="25" height="600" width="1000" />
             </Container>
             
             
@@ -59,7 +63,7 @@ class MainBody extends Component {
         return (
             <Container>
                 <Introduction/>
-                <Container className="justify-content-center">
+                <Container className="justify-content-center mb-5">
                     {body}
                     
                 </Container>
