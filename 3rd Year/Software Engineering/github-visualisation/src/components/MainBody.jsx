@@ -47,7 +47,12 @@ class MainBody extends Component {
                     </div>
         }
         else if (this.state.state === 3){
-            body = <BarChart data={this.state.barchartData} margin="50" height="600" width="1000"/>
+
+            body = <Container>
+                <a href={`https://github.com/${this.state.repoOwner}/${this.state.repoName}`}><h3>{`https://github.com/${this.state.repoOwner}/${this.state.repoName}`}</h3></a>
+                <BarChart data={this.state.barchartData} margin="50" height="600" width="1000"/>
+            </Container>
+            
             
         }
         return (
