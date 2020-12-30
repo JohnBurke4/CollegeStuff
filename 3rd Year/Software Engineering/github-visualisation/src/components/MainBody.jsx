@@ -50,6 +50,7 @@ class MainBody extends Component {
 
             body = <Container>
                 <a href={`https://github.com/${this.state.repoOwner}/${this.state.repoName}`}><h3>{`https://github.com/${this.state.repoOwner}/${this.state.repoName}`}</h3></a>
+                <h4>Commits analysed: {this.state.barchartData.reduce((a,b) => a+b)}</h4>
                 <BarChart data={this.state.barchartData} margin="50" height="600" width="1000"/>
             </Container>
             
