@@ -1,7 +1,11 @@
 async function getCommits(repoOwner, repoName, authToken){
-    const header = new Headers({
-        'Authorization': `token ${authToken}` 
-     });
+    let header;
+    if (authToken !== ""){
+        header = new Headers({
+            'Authorization': `token ${authToken}` 
+        });
+    }
+    
     
     let maxPages = 10;
     let currentPage = 1;

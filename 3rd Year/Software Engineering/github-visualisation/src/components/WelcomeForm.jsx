@@ -43,7 +43,7 @@ class WelcomeForm extends Component {
                     <Form.Label>Authentification Token</Form.Label>
                     <Form.Control placeholder="Enter Auth Token" onChange={this.handleChangeAuthCode} />
                         <Form.Text className="text-muted">
-                            This isn't saved anywhere.
+                            (Optional) This isn't saved anywhere.
                         </Form.Text>
                 </Form.Group>
 
