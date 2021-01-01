@@ -1,10 +1,10 @@
 # CSU33012 - Software Engineering - Metric Visualisation Project
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project can be viewed [Here](https://github-visualiser.herokuapp.com/).
 
 ## GitHub Visualiser
 
-This app uses the GitHub API to fetch infroamtion about a project's commits. The app parses this data and displays charts highlighting the most common times that a commit is posted and information about the top 50 committers.
+This app uses the GitHub API to fetch information about a project's commits. The app parses this data and displays charts highlighting the most common times commits are pushed and information about the top 50 committers.
 
 ## Setup and Running
 
