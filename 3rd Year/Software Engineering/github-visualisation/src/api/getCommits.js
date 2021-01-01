@@ -8,6 +8,7 @@ async function getCommits(repoOwner, repoName, authToken){
     let hoursData = new Array(24).fill(0);
     let authorData = {}
     let length = 1;
+    let error = "";
     while (currentPage <= maxPages && length !== 0){
         let url = `https://api.github.com/repos/${repoOwner}/${repoName}/commits?per_page=100&page=${currentPage}`
         var data = await fetch(url, 
@@ -30,13 +31,19 @@ async function getCommits(repoOwner, repoName, authToken){
             hoursData[hours]++;
         }
         currentPage++;
+        let status = await data.status;
+        if (status !== 200){
+            error = json["message"];
+            break;
+        }
     }
     // for( const [key, value] of Object.entries(authorData)){
     //     console.log(key, value);
     // }
     return {
         hours: hoursData,
-        authors: authorData
+        authors: authorData,
+        error: error
     };
 }
 

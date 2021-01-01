@@ -16,6 +16,7 @@ class MainBody extends Component {
             hasResult: false,
             barchartData: [],
             authorData: [],
+            error: "",
             state: 1
         }
         
@@ -30,19 +31,31 @@ class MainBody extends Component {
             state: 2
         });
         getCommits(owner, name, auth).then((data) => {
-            console.log(data);
-            this.setState({
-                barchartData: data.hours,
-                authorData: data.authors,
-                state: 3
-            });
+            console.log(data.error);
+            if (data.error === ""){
+                this.setState({
+                    barchartData: data.hours,
+                    authorData: data.authors,
+                    state: 3
+                });
+            }
+            else {
+                this.setState({
+                    error: `Error: ${data.error} please try again.`,
+                    state: 1
+                });
+            }
+            
         });
 
     }
     render() {
         let body;
         if (this.state.state === 1){
-            body = <WelcomeForm dataFunction={this.updateRepoData}/>
+            body = <div>
+                <WelcomeForm dataFunction={this.updateRepoData}/>
+                <h3 className="mt-5">{this.state.error}</h3>
+                </div>
         }
         else if (this.state.state === 2){
             body =  <div className="d-flex justify-content-center">
