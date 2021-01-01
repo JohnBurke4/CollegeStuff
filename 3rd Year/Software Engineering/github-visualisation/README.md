@@ -1,6 +1,6 @@
 # CSU33012 - Software Engineering - Metric Visualisation Project
 
-This project can be viewed [Here](https://github-visualiser.herokuapp.com/).
+This project can be viewed [here](https://github-visualiser.herokuapp.com/).
 
 ## GitHub Visualiser
 
