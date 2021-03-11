@@ -128,7 +128,7 @@ class Proxy:
                         tk.END, 'Time saved by fetching from cache: {:.5f}'.format(currentTimeSaved))
                     self.textBox.insert(
                         tk.END, 'Bandwidth saved by fetching from cache: {:.5f} KB/s'.format(
-                            bandwidth / (currentTimeSaved * 1024)))
+                            bandwidth / (cache[2] * 1024)))
                     self.timeText.set(
                         'Time saved by caching: {:.5f}s'.format(self.timeSaved))
                     self.bandwidthText.set(
