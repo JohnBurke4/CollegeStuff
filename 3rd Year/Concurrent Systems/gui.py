@@ -23,7 +23,7 @@ class GUI:
         self.timeSaved = tk.StringVar()
         self.timeSaved.set('Time saved by cache: 0s')
         self.bandwidthSaved = tk.StringVar()
-        self.bandwidthSaved.set('Bandwidth saved by cache:\n 0 KB')
+        self.bandwidthSaved.set('Network traffic saved by cache:\n 0 KB')
 
         self.proxy = Proxy(self.config, self.timeSaved, self.bandwidthSaved)
 

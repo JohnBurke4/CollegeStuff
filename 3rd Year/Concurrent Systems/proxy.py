@@ -53,7 +53,7 @@ class Proxy:
     def listenForClients(self, textBox):
         self.textBox = textBox
         while True:
-            # Esatblish the connection
+            # Establish the connection
             (clientSocket, clientAddress) = self.serverSocket.accept()
 
             d = threading.Thread(name=self.getClientName(clientAddress),
@@ -115,6 +115,7 @@ class Proxy:
                 cache = self.getFromCache(firstLine)
                 if (cache is not None):
                     bandwidth = 0
+                    # Sending all the packets from the cache
                     for data in cache[1]:
                         bandwidth += len(data)
                         clientSocket.sendall(data)
@@ -122,13 +123,16 @@ class Proxy:
                     endTime = time.time()
                     timeElapsed = endTime-startTime
                     currentTimeSaved = cache[2] - timeElapsed
+
                     self.timeSaved += currentTimeSaved
                     self.bandwidthSaved += bandwidth
+
                     self.textBox.insert(
                         tk.END, 'Time saved by fetching from cache: {:.5f}'.format(currentTimeSaved))
                     self.textBox.insert(
                         tk.END, 'Bandwidth saved by fetching from cache: {:.5f} KB/s'.format(
                             bandwidth / (cache[2] * 1024)))
+
                     self.timeText.set(
                         'Time saved by caching: {:.5f}s'.format(self.timeSaved))
                     self.bandwidthText.set(
@@ -147,7 +151,7 @@ class Proxy:
                         s.connect((webserver, port))
                         # Setting up http tunneling reply
                         reply = "HTTP/1.0 200 Connection established\r\n"
-                        reply += "Proxy-agent: MyTestProxy\r\n"
+                        reply += "Proxy-agent: JohnsProxy\r\n"
                         reply += "\r\n"
 
                         clientSocket.sendall(reply.encode())
@@ -190,14 +194,16 @@ class Proxy:
                                 # Recieve data from web serer
                                 data = s.recv(
                                     self.config['MAX_REQUEST_LENGTH'])
-
+                                # Checking if there is more data to come
                                 if (len(data) == self.config['MAX_REQUEST_LENGTH']):
                                     cache.append(data)
                                     clientSocket.send(data)
+                                # Otherwise cache the response
                                 elif (len(data) > 0):
                                     cache.append(data)
                                     clientSocket.send(data)
                                     endTime = time.time()
+                                    # Cache the response along with the time it took to fetch and the url
                                     self.addToCache(
                                         firstLine, cache, (endTime - startTime))
                                 else:
@@ -233,10 +239,15 @@ class Proxy:
         self.blacklist.remove(url)
 
     def getFromCache(self, request):
+        # If the request is HTTPS, there is no cached response
         if ('CONNECT' in request):
             return None
+
+        # Check if the URL is already cached
         cached = self.cache.get(request)
+        #
         if (cached is not None):
+            # Check if the cached response has expired
             if (cached[0] + self.config['TTL'] > int(time.time())):
                 return cached
         return None
