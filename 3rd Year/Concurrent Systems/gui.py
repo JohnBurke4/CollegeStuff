@@ -9,7 +9,7 @@ class GUI:
         'HOST_NAME': '0.0.0.0',
         'BIND_PORT': 12345,
         'MAX_REQUEST_LENGTH': 8192,
-        'CONNECTION_TIMEOUT': 5,
+        'CONNECTION_TIMEOUT': 15,
         'TTL': 10080
     }
 
